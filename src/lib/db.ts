@@ -49,6 +49,46 @@ export interface WasteForecastPublic extends WasteForecast {
     companies?: { company_name: string; location: string; industry_type: string };
 }
 
+export interface WasteSchedule {
+    id: string;
+    company_id: string;
+    waste_type: string;
+    quantity: number;
+    unit: string;
+    schedule_date: string;
+    time_from?: string;
+    time_to?: string;
+    frequency: string;
+    description?: string;
+    location?: string;
+    hazard_level: string;
+    handling_notes?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface WasteScheduleRecurring {
+    id: string;
+    company_id: string;
+    waste_type: string;
+    quantity: number;
+    unit: string;
+    frequency: string;
+    day_of_week?: number;
+    day_of_month?: number;
+    time_from?: string;
+    time_to?: string;
+    start_date: string;
+    end_date?: string;
+    description?: string;
+    location?: string;
+    hazard_level: string;
+    handling_notes?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
 
 export interface MaterialRequest {
     id: string;
@@ -803,6 +843,118 @@ export async function findMatchesForForecast(wasteType: string): Promise<Materia
     
     if (error) { console.error('[db] findMatchesForForecast:', error.message); return []; }
     return (data as unknown as MaterialRequest[]) ?? [];
+}
+
+/* ═══════════════════════════════════
+   WASTE SCHEDULE
+   ═══════════════════════════════════ */
+
+export async function getWasteScheduleForDate(date: string): Promise<WasteSchedule[]> {
+    const { data, error } = await supabase
+        .from('waste_schedule')
+        .select('*')
+        .eq('schedule_date', date)
+        .eq('is_active', true)
+        .order('time_from', { ascending: true });
+    
+    if (error) { console.error('[db] getWasteScheduleForDate:', error.message); return []; }
+    return (data as WasteSchedule[]) ?? [];
+}
+
+export async function getWasteScheduleForMonth(year: number, month: number): Promise<WasteSchedule[]> {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+    
+    const { data, error } = await supabase
+        .from('waste_schedule')
+        .select('*')
+        .gte('schedule_date', startDate)
+        .lte('schedule_date', endDate)
+        .eq('is_active', true)
+        .order('schedule_date', { ascending: true });
+    
+    if (error) { console.error('[db] getWasteScheduleForMonth:', error.message); return []; }
+    return (data as WasteSchedule[]) ?? [];
+}
+
+export async function createWasteScheduleEntry(
+    payload: Omit<WasteSchedule, 'id' | 'company_id' | 'created_at' | 'updated_at'>
+): Promise<{ data: WasteSchedule | null; error: string | null }> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { data: null, error: 'Not authenticated' };
+    
+    const { data, error } = await supabase
+        .from('waste_schedule')
+        .insert({ 
+            company_id: user.id,
+            ...payload,
+            is_active: true
+        })
+        .select()
+        .single();
+    
+    if (error) return { data: null, error: error.message };
+    return { data: data as WasteSchedule, error: null };
+}
+
+export async function updateWasteScheduleEntry(
+    id: string,
+    payload: Partial<Omit<WasteSchedule, 'id' | 'company_id' | 'created_at' | 'updated_at'>>
+): Promise<{ data: WasteSchedule | null; error: string | null }> {
+    const { data, error } = await supabase
+        .from('waste_schedule')
+        .update({ ...payload, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+    
+    if (error) return { data: null, error: error.message };
+    return { data: data as WasteSchedule, error: null };
+}
+
+export async function deleteWasteScheduleEntry(id: string): Promise<{ error: string | null }> {
+    const { error } = await supabase
+        .from('waste_schedule')
+        .delete()
+        .eq('id', id);
+    
+    if (error) return { error: error.message };
+    return { error: null };
+}
+
+export async function createWasteScheduleRecurring(
+    payload: Omit<WasteScheduleRecurring, 'id' | 'company_id' | 'created_at' | 'updated_at'>
+): Promise<{ data: WasteScheduleRecurring | null; error: string | null }> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { data: null, error: 'Not authenticated' };
+    
+    const { data, error } = await supabase
+        .from('waste_schedule_recurring')
+        .insert({ 
+            company_id: user.id,
+            ...payload,
+            is_active: true
+        })
+        .select()
+        .single();
+    
+    if (error) return { data: null, error: error.message };
+    return { data: data as WasteScheduleRecurring, error: null };
+}
+
+export async function getWasteScheduleRecurring(): Promise<WasteScheduleRecurring[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+    
+    const { data, error } = await supabase
+        .from('waste_schedule_recurring')
+        .select('*')
+        .eq('company_id', user.id)
+        .eq('is_active', true)
+        .order('frequency', { ascending: true });
+    
+    if (error) { console.error('[db] getWasteScheduleRecurring:', error.message); return []; }
+    return (data as WasteScheduleRecurring[]) ?? [];
 }
 
 export interface Transaction {
