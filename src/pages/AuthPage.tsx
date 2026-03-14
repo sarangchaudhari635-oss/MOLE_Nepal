@@ -11,6 +11,48 @@ import {
 /* ─────────────────────── Types ─────────────────────── */
 type AuthScreen = 'signin' | 'signup' | 'forgot' | 'onboarding';
 
+interface CaptchaProps {
+    captcha: { question: string; answer: string };
+    userCaptcha: string;
+    setUserCaptcha: (val: string) => void;
+    generateCaptcha: () => void;
+}
+
+/* ─────────────────────── Captcha UI Component ─────────────────────── */
+const CaptchaUI = ({ captcha, userCaptcha, setUserCaptcha, generateCaptcha }: CaptchaProps) => (
+    <div className="space-y-3 p-4 bg-surface-50 rounded-xl border border-surface-200">
+        <div className="flex items-center justify-between">
+            <label className="text-[13px] font-bold text-surface-700 flex items-center gap-2">
+                <ShieldCheck size={16} className="text-brand-500" />
+                Security Verification
+            </label>
+            <button
+                type="button"
+                onClick={generateCaptcha}
+                className="p-1 hover:bg-surface-200 rounded-md transition-colors text-surface-400 hover:text-brand-500"
+                title="Refresh Captcha"
+            >
+                <RefreshCcw size={14} />
+            </button>
+        </div>
+        <div className="flex items-center gap-4">
+            <div className="bg-white px-4 py-2 rounded-lg border border-surface-200 font-mono font-bold text-lg tracking-widest text-surface-900 shadow-sm select-none">
+                {captcha.question} = ?
+            </div>
+            <div className="flex-1">
+                <input
+                    type="text"
+                    required
+                    placeholder="Answer"
+                    value={userCaptcha}
+                    onChange={(e) => setUserCaptcha(e.target.value)}
+                    className="w-full bg-white border border-surface-200 rounded-lg px-3 py-2 text-[15px] font-bold text-surface-900 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-center"
+                />
+            </div>
+        </div>
+    </div>
+);
+
 /* ─────────────────────── Industry Options ─────────────────────── */
 const INDUSTRIES = [
     'Manufacturing', 'Steel & Metals', 'Chemicals & Petrochemicals',
@@ -303,40 +345,6 @@ const AuthPage = () => {
     const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong (Required)'];
     const strengthColors = ['', 'bg-red-400', 'bg-amber-400', 'bg-emerald-400', 'bg-emerald-500'];
 
-    /* ─── Captcha UI Component ─── */
-    const CaptchaUI = () => (
-        <div className="space-y-3 p-4 bg-surface-50 rounded-xl border border-surface-200">
-            <div className="flex items-center justify-between">
-                <label className="text-[13px] font-bold text-surface-700 flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-brand-500" />
-                    Security Verification
-                </label>
-                <button
-                    type="button"
-                    onClick={generateCaptcha}
-                    className="p-1 hover:bg-surface-200 rounded-md transition-colors text-surface-400 hover:text-brand-500"
-                    title="Refresh Captcha"
-                >
-                    <RefreshCcw size={14} />
-                </button>
-            </div>
-            <div className="flex items-center gap-4">
-                <div className="bg-white px-4 py-2 rounded-lg border border-surface-200 font-mono font-bold text-lg tracking-widest text-surface-900 shadow-sm select-none">
-                    {captcha.question} = ?
-                </div>
-                <div className="flex-1">
-                    <input
-                        type="text"
-                        required
-                        placeholder="Answer"
-                        value={userCaptcha}
-                        onChange={(e) => setUserCaptcha(e.target.value)}
-                        className="w-full bg-white border border-surface-200 rounded-lg px-3 py-2 text-[15px] font-bold text-surface-900 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all text-center"
-                    />
-                </div>
-            </div>
-        </div>
-    );
 
     /* ─── Visual Panel Content ─── */
     const getPanelContent = () => {
@@ -546,7 +554,12 @@ const AuthPage = () => {
                                     </div>
                                 </div>
 
-                                <CaptchaUI />
+                                <CaptchaUI
+                                    captcha={captcha}
+                                    userCaptcha={userCaptcha}
+                                    setUserCaptcha={setUserCaptcha}
+                                    generateCaptcha={generateCaptcha}
+                                />
 
                                 <div className="flex justify-end">
                                     <button
@@ -733,7 +746,12 @@ const AuthPage = () => {
                                     )}
                                 </div>
 
-                                <CaptchaUI />
+                                <CaptchaUI
+                                    captcha={captcha}
+                                    userCaptcha={userCaptcha}
+                                    setUserCaptcha={setUserCaptcha}
+                                    generateCaptcha={generateCaptcha}
+                                />
 
                                 {/* Terms */}
                                 <p className="text-[12px] text-surface-400 leading-relaxed">
