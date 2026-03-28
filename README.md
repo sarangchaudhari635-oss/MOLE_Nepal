@@ -1,4 +1,4 @@
-# ♻️ ScrapIQ - Circular Economy Marketplace (MOLE)
+# ♻️ Mole Circular Economy Marketplace 
 
 > **An AI-powered B2B marketplace engineered to intelligently match industrial waste streams with verified buyers, promoting a sustainable circular economy.**
 
