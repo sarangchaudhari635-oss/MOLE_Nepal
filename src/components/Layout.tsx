@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { DockChat } from './DockChat';
 import {
     LayoutDashboard,
     ListPlus,
@@ -7,7 +8,6 @@ import {
     ChevronDown,
     Lightbulb,
     BarChart3,
-    Bot,
     FileText,
     LogOut,
     Menu,
@@ -193,7 +193,6 @@ const Layout = () => {
                     <SectionLabel>Analytics</SectionLabel>
                     <SidebarItem icon={BarChart3} label="Impact Analytics" to="/app/analytics" />
                     <SidebarItem icon={PieChart} label="Waste Insights" to="/app/insights" />
-                    <SidebarItem icon={Bot} label="AI Assistant" to="/app/chat" />
                     <SidebarItem icon={Clock} label="Trade History" to="/app/network" />
 
                     <SectionLabel>System</SectionLabel>
@@ -382,6 +381,7 @@ const Layout = () => {
                     <Outlet />
                 </div>
             </main>
+            <DockChat position="bottom-right" />
         </div>
     );
 };

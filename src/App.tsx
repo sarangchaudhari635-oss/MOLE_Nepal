@@ -8,7 +8,6 @@ const ListWaste = lazy(() => import('./pages/ListWaste'));
 const WasteForecastPage = lazy(() => import('./pages/WasteForecast'));
 const AIProcessing = lazy(() => import('./pages/AIProcessing'));
 const Matches = lazy(() => import('./pages/Matches'));
-const AIChat = lazy(() => import('./pages/AIChat'));
 const Opportunities = lazy(() => import('./pages/Opportunities'));
 const FindMaterials = lazy(() => import('./pages/FindMaterials'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -82,7 +81,6 @@ function App() {
                             <Route path="find" element={<FindMaterials />} />
                             <Route path="processing" element={<AIProcessing />} />
                             <Route path="matches" element={<Matches />} />
-                            <Route path="chat" element={<AIChat />} />
                             <Route path="opportunities" element={<Opportunities />} />
                             <Route path="deals" element={<MyDeals />} />
                             <Route path="network" element={<TradeHistory />} />
