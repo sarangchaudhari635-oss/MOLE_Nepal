@@ -9,7 +9,7 @@
 
 ## 📖 Overview
 
-**ScrapIQ** (formerly MOLE / CirculaNet) is a modern, enterprise-grade SaaS platform built to solve the industrial waste problem. Instead of letting valuable byproducts and industrial scrap go to landfills, ScrapIQ bridges the gap between waste generators and recyclers.
+**MOLE** (formerly MOLE / CirculaNet) is a modern, enterprise-grade SaaS platform built to solve the industrial waste problem. Instead of letting valuable byproducts and industrial scrap go to landfills, ScrapIQ bridges the gap between waste generators and recyclers.
 
 Our intelligent **matching engine** automatically ranks and connects sellers with buyers based on physical location proximity, material compatibility, and chemical composition—turning waste into revenue.
 
