@@ -165,7 +165,7 @@ const LandingPage = () => {
                             Transform Industrial{' '}
                             <br className="hidden lg:block" />
                             Waste into{' '}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 via-emerald-500 to-teal-500 dark:from-brand-400 dark:via-emerald-400 dark:to-teal-400 animate-gradient">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 via-emerald-500 to-teal-500 dark:from-brand-400 dark:via-emerald-400 dark:to-teal-400 animate-gradient italic" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                                 Economic Value
                             </span>
                         </h1>
@@ -193,7 +193,7 @@ const LandingPage = () => {
 
                     {/* Hero Visual — Abstract Industrial Network */}
                     <div className="flex-1 w-full max-w-xl lg:max-w-none relative">
-                        <div className="relative aspect-square md:aspect-[4/3] rounded-3xl bg-white/90 dark:bg-white/[0.06] border border-surface-200/60 dark:border-white/10 shadow-2xl shadow-black/[0.04] dark:shadow-black/30 overflow-hidden flex flex-col justify-center items-center p-8 backdrop-blur-md">
+                        <div className="relative aspect-square md:aspect-[4/3] rounded-3xl overflow-hidden flex flex-col justify-center items-center p-8">
                             {/* Grid BG */}
                             <svg className="absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
