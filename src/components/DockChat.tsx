@@ -270,17 +270,6 @@ export const DockChat: React.FC<DockChatProps> = ({
                 )}
             >
                 <AnimatePresence>
-                    {!isOpen && (
-                        <motion.div
-                            initial={{ opacity: 0, x: 10, scale: 0.95 }}
-                            animate={{ opacity: 1, x: 0, scale: 1 }}
-                            exit={{ opacity: 0, x: 10, scale: 0.95 }}
-                            transition={{ delay: 1.5, type: 'spring', stiffness: 200, damping: 20 }}
-                            className="absolute right-[calc(100%+14px)] bg-[#2a2a2a] text-white text-[15px] tracking-wide px-5 py-3 rounded-2xl shadow-xl border border-white/5 pointer-events-none whitespace-nowrap"
-                        >
-                            Hey! I'm online now.
-                        </motion.div>
-                    )}
                 </AnimatePresence>
 
                 <motion.button
@@ -314,9 +303,9 @@ export const DockChat: React.FC<DockChatProps> = ({
                                 className="w-full h-full rounded-full overflow-hidden flex items-center justify-center p-0.5"
                             >
                                 <img 
-                                    src="https://api.dicebear.com/7.x/notionists/svg?seed=MOLE&backgroundColor=transparent&face=smile" 
+                                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=transparent" 
                                     alt="AI Assistant" 
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover scale-110 mt-1"
                                 />
                             </motion.div>
                         )}
