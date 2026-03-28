@@ -62,6 +62,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     /* ─── Sign In ─── */
     const login = async (email: string, password: string): Promise<{ error: string | null }> => {
+        if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL === 'https://placeholder.supabase.co') {
+            // Demo fallback
+            setUser({ name: email.split('@')[0], company: 'Demo Company', email });
+            setSession({ user: { id: 'demo123', email } } as any);
+            return { error: null };
+        }
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) return { error: error.message };
         return { error: null };
@@ -75,6 +81,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         industry: string,
         location: string
     ): Promise<{ error: string | null }> => {
+        if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL === 'https://placeholder.supabase.co') {
+            // Demo fallback
+            setUser({ name: email.split('@')[0], company, email });
+            setSession({ user: { id: 'demo123', email } } as any);
+            return { error: null };
+        }
+
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -104,7 +117,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     /* ─── Sign Out ─── */
     const logout = async () => {
-        await supabase.auth.signOut();
+        if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder.supabase.co') {
+            await supabase.auth.signOut();
+        }
         setSession(null);
         setSupabaseUser(null);
         setUser(null);
