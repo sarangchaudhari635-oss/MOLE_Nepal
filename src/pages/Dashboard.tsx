@@ -72,7 +72,7 @@ const MetricPill = ({ icon: Icon, label, value, trend, color, loading, to }: {
 
 /* ─── Platform Stats Hook ─── */
 function usePlatformStats() {
-    const [stats, setStats] = useState({ userWaste: 0, globalWaste: 0, totalSavings: 0, totalCO2: 0 });
+    const [stats, setStats] = useState({ userWaste: 0, activeOpportunities: 0, totalSavings: 0, totalCO2: 0 });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -81,11 +81,13 @@ function usePlatformStats() {
             const { data: { user } } = await supabase.auth.getUser();
 
             // Fetch concurrently
-            const [userWasteRes, globalWasteRes, tradesRes] = await Promise.all([
+            const [userWasteRes, opportunitiesRes, tradesRes] = await Promise.all([
                 // 1. User's own listings
                 supabase.from('waste_listings').select('*', { count: 'exact', head: true }).eq('company_id', user?.id),
-                // 2. All waste listed on the platform (Opportunities as per user definition)
-                supabase.from('waste_listings').select('*', { count: 'exact', head: true }),
+                // 2. User's active opportunities
+                supabase.from('opportunities').select('*', { count: 'exact', head: true })
+                    .eq('company_id', user?.id)
+                    .eq('status', 'active'),
                 // 3. Impact from accepted trades
                 supabase.from('opportunities').select('cost_savings, co2_saved_kg').eq('status', 'accepted'),
             ]);
@@ -95,7 +97,7 @@ function usePlatformStats() {
 
             setStats({
                 userWaste: userWasteRes.count ?? 0,
-                globalWaste: globalWasteRes.count ?? 0,
+                activeOpportunities: opportunitiesRes.count ?? 0,
                 totalSavings,
                 totalCO2,
             });
@@ -231,8 +233,8 @@ const Dashboard = () => {
                 />
                 <MetricPill
                     icon={Lightbulb} label="Active Opportunities"
-                    value={(stats.globalWaste + 12).toLocaleString()} // Including global volume context
-                    trend="+12 New Today"
+                    value={stats.activeOpportunities.toLocaleString()}
+                    trend={stats.activeOpportunities > 0 ? "Needs Review" : "Up to date"}
                     color="bg-gradient-to-br from-amber-500 to-orange-500"
                     loading={statsLoading}
                     to="/app/opportunities"
