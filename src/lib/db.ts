@@ -1107,3 +1107,116 @@ export async function createNetworkConnection(
     if (error) return { error: error.message };
     return { error: null };
 }
+
+/* ═══════════════════════════════════
+   DEAL STAGE UPDATES
+   ═══════════════════════════════════ */
+
+export async function updateDealStage(
+    id: string,
+    stage: string
+): Promise<{ error: string | null }> {
+    const { error } = await supabase
+        .from('transactions')
+        .update({ stage, updated_at: new Date().toISOString() })
+        .eq('id', id);
+    if (error) return { error: error.message };
+    return { error: null };
+}
+
+export async function updateDealStatus(
+    id: string,
+    status: 'draft' | 'active' | 'completed' | 'cancelled'
+): Promise<{ error: string | null }> {
+    const { error } = await supabase
+        .from('transactions')
+        .update({ status })
+        .eq('id', id);
+    if (error) return { error: error.message };
+    return { error: null };
+}
+
+/* ═══════════════════════════════════
+   NOTIFICATION HELPERS
+   ═══════════════════════════════════ */
+
+export async function createNotification(payload: {
+    company_id: string;
+    type: Notification['type'];
+    title: string;
+    body: string;
+    action_url?: string;
+    meta?: Record<string, unknown>;
+}): Promise<{ error: string | null }> {
+    const { error } = await supabase
+        .from('notifications')
+        .insert({
+            ...payload,
+            is_read: false,
+        });
+    if (error) {
+        console.error('[db] createNotification:', error.message);
+        return { error: error.message };
+    }
+    return { error: null };
+}
+
+/* ═══════════════════════════════════
+   WASTE ANALYTICS (Aggregate Queries)
+   ═══════════════════════════════════ */
+
+export interface WasteInsight {
+    label: string;
+    count: number;
+}
+
+export async function getTopWasteTypes(limit = 10): Promise<WasteInsight[]> {
+    const { data, error } = await supabase
+        .from('waste_listings')
+        .select('waste_type');
+    if (error || !data) return [];
+
+    const counts: Record<string, number> = {};
+    data.forEach((d: any) => {
+        counts[d.waste_type] = (counts[d.waste_type] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+        .map(([label, count]) => ({ label, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+}
+
+export async function getTopDemandMaterials(limit = 10): Promise<WasteInsight[]> {
+    const { data, error } = await supabase
+        .from('material_requests')
+        .select('material_needed');
+    if (error || !data) return [];
+
+    const counts: Record<string, number> = {};
+    data.forEach((d: any) => {
+        counts[d.material_needed] = (counts[d.material_needed] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+        .map(([label, count]) => ({ label, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+}
+
+export async function getTopIndustries(limit = 10): Promise<WasteInsight[]> {
+    const { data, error } = await supabase
+        .from('companies')
+        .select('industry_type');
+    if (error || !data) return [];
+
+    const counts: Record<string, number> = {};
+    data.forEach((d: any) => {
+        if (d.industry_type) counts[d.industry_type] = (counts[d.industry_type] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+        .map(([label, count]) => ({ label, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+}

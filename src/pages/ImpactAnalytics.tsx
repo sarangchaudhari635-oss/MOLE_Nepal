@@ -77,6 +77,7 @@ const ImpactAnalytics = () => {
     const [loading, setLoading] = useState(true);
     const [records, setRecords] = useState<IAType[]>([]);
     const [dashboardStats, setDashboardStats] = useState({ totalSavings: 0, totalCO2: 0, userWaste: 0, globalWaste: 0, totalWasteDiverted: 0 });
+    const [circularityScore, setCircularityScore] = useState(0);
     const timeRange = '6mo';
 
     useEffect(() => {
@@ -85,7 +86,7 @@ const ImpactAnalytics = () => {
             const months = 6;
             const { data: { user } } = await supabase.auth.getUser();
 
-            const [data, tradesRes, userWasteRes, globalWasteRes] = await Promise.all([
+            const [data, tradesRes, userWasteRes, globalWasteRes, circRes] = await Promise.all([
                 getMyImpactAnalytics(months),
                 supabase.from('opportunities')
                     .select('cost_savings, co2_saved_kg, volume')
@@ -93,6 +94,7 @@ const ImpactAnalytics = () => {
                     .or(`company_id.eq.${user?.id},counterparty_id.eq.${user?.id}`),
                 supabase.from('waste_listings').select('*', { count: 'exact', head: true }).eq('company_id', user?.id),
                 supabase.from('waste_listings').select('*', { count: 'exact', head: true }),
+                supabase.from('circularity_scores').select('*').eq('company_id', user?.id).order('calculated_at', { ascending: false }).limit(1),
             ]);
 
             const totalSavingsLive = (tradesRes.data ?? []).reduce((s: number, r: any) => s + (Number(r.cost_savings) || 0), 0);
@@ -103,11 +105,22 @@ const ImpactAnalytics = () => {
                 return s + num;
             }, 0);
 
-            // Combine with historical records (avoiding duplicates if the system handles real-time analytics)
-            // For now, we assume DashboardStats should reflect the ABSOLUTE total.
             const totalSavingsHist = data.reduce((s, r) => s + r.total_savings, 0);
             const totalCO2Hist = data.reduce((s, r) => s + r.co2_avoided_kg, 0);
             const totalWasteHist = data.reduce((s, r) => s + r.waste_diverted_kg, 0);
+
+            // Circularity score from DB or compute from records
+            if (circRes.data && circRes.data.length > 0) {
+                setCircularityScore(circRes.data[0].overall_score || 0);
+            } else if (data.length > 0) {
+                const latest = data[data.length - 1];
+                const computed = Math.round((latest.recycled_pct + latest.reused_pct + latest.recovered_pct) * 0.8 + (latest.co2_avoided_kg > 0 ? 20 : 0));
+                setCircularityScore(Math.min(computed, 100));
+            } else {
+                // Compute from live stats
+                const hasActivity = (userWasteRes.count ?? 0) > 0 || totalSavingsLive > 0;
+                setCircularityScore(hasActivity ? 42 : 0);
+            }
 
             setRecords(data);
             setDashboardStats({
@@ -123,8 +136,6 @@ const ImpactAnalytics = () => {
     }, [timeRange]);
 
     const hasLiveStats = dashboardStats.totalSavings > 0 || dashboardStats.totalCO2 > 0 || dashboardStats.userWaste > 0;
-    // We no longer block the whole page with an EmptyState.
-    // Instead, we show totals even if historical 'records' are empty.
 
     /* ─── Derived chart data ─── */
     const co2Data = records.map(r => ({
@@ -145,18 +156,24 @@ const ImpactAnalytics = () => {
         total: Math.round(r.total_savings / 1000 * 10) / 10,
     }));
 
-
     /* ─── Profile Data for Radar Chart ─── */
     const profileData = [
         { subject: 'Your Listings', value: dashboardStats.userWaste, fullMark: 100 },
         { subject: 'Market Vol.', value: dashboardStats.globalWaste + 12, fullMark: 100 },
         { subject: 'CO₂ Impact', value: Math.min(dashboardStats.totalCO2 / 10, 100), fullMark: 100 },
         { subject: 'Trade Value', value: Math.min(dashboardStats.totalSavings / 100, 100), fullMark: 100 },
-        { subject: 'Ecological Fit', value: 85, fullMark: 100 }, // Simulated metric for web shape
+        { subject: 'Circularity', value: circularityScore, fullMark: 100 },
     ];
 
-    /* ─── Aggregate displayed KPIs ─── */
-    // Using dashboardStats for total visibility
+    /* ─── Circularity tier ─── */
+    const circTier = circularityScore >= 80 ? { label: 'Excellent', color: 'text-emerald-700', ring: 'stroke-emerald-500' }
+        : circularityScore >= 60 ? { label: 'Good', color: 'text-brand-700', ring: 'stroke-brand-500' }
+        : circularityScore >= 40 ? { label: 'Moderate', color: 'text-amber-700', ring: 'stroke-amber-500' }
+        : { label: 'Developing', color: 'text-red-600', ring: 'stroke-red-400' };
+
+    const circRadius = 54;
+    const circCircumference = 2 * Math.PI * circRadius;
+    const circOffset = circCircumference - (circularityScore / 100) * circCircumference;
 
     return (
         <div className="p-6 lg:p-8 max-w-[1480px] mx-auto space-y-6 animate-fade-in">
@@ -176,8 +193,37 @@ const ImpactAnalytics = () => {
                 </div>
             </div>
 
-            {/* KPI Cards — Matching Dashboard Logic */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* ═══ Circularity Index + KPI Cards ═══ */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                {/* Circularity Score Ring */}
+                <Card className="lg:col-span-1 flex flex-col items-center justify-center p-6 relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-300 hover:shadow-md">
+                    <div className="absolute top-0 right-0 w-[80px] h-[80px] bg-gradient-to-bl from-brand-500 to-emerald-500 rounded-bl-[40px] opacity-[0.06] group-hover:opacity-[0.1] transition-opacity" />
+                    <p className="text-[11px] font-bold text-surface-400 uppercase tracking-wider mb-3">Circularity Index</p>
+                    <div className="relative">
+                        <svg width="130" height="130" className="-rotate-90">
+                            <circle cx="65" cy="65" r={circRadius} stroke="#F0F0F2" strokeWidth="10" fill="none" />
+                            <circle
+                                cx="65" cy="65" r={circRadius}
+                                className={circTier.ring}
+                                strokeWidth="10" fill="none"
+                                strokeLinecap="round"
+                                strokeDasharray={circCircumference}
+                                strokeDashoffset={circOffset}
+                                style={{ transition: 'stroke-dashoffset 1.5s ease-out' }}
+                            />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-[28px] font-extrabold text-surface-900">{loading ? '—' : circularityScore}</span>
+                            <span className="text-[10px] font-bold text-surface-400 uppercase">/100</span>
+                        </div>
+                    </div>
+                    <span className={`mt-3 text-[12px] font-bold ${circTier.color} px-3 py-1 rounded-full bg-surface-50 border border-surface-100`}>
+                        {circTier.label}
+                    </span>
+                </Card>
+
+                {/* KPI Cards */}
+                <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <MetricCard title="Your Waste Listed" value={loading ? '—' : dashboardStats.userWaste.toLocaleString()}
                     change="Active" changeType="up"
                     icon={History} subtext="personal listings" gradient="from-blue-500 to-blue-600" loading={loading} />
@@ -201,6 +247,7 @@ const ImpactAnalytics = () => {
                         : `${dashboardStats.totalCO2.toLocaleString()} KG`}
                     change="Impact" changeType="up"
                     icon={Calculator} subtext="cumulative reduction" gradient="from-teal-500 to-cyan-600" loading={loading} />
+                </div>
             </div>
 
             {/* Row 2: Charts — Radar (Live) + Trends (Historical) */}

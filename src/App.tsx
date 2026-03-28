@@ -17,6 +17,7 @@ import ImpactAnalytics from './pages/ImpactAnalytics';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import MyDeals from './pages/MyDeals';
+import WasteInsights from './pages/WasteInsights';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -86,6 +87,7 @@ function App() {
                         <Route path="network" element={<TradeHistory />} />
                         <Route path="messages" element={<Messages />} />
                         <Route path="analytics" element={<ImpactAnalytics />} />
+                        <Route path="insights" element={<WasteInsights />} />
                         <Route path="reports" element={<Reports />} />
                         <Route path="settings" element={<Settings />} />
                     </Route>

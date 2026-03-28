@@ -3,14 +3,15 @@ import {
     Search, MapPin, ChevronDown, Loader, ArrowRight, Sparkles,
     Package, Recycle, CheckCircle2, Leaf,
     ShieldCheck, Truck, Clock, Factory,
-    Filter, Layers, Send
+    Filter, Layers, Send, ChevronUp, Info, Zap, Target
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
     createMaterialRequest, getAllWasteListings, getMyOpportunities,
-    type WasteListingPublic, type OpportunityWithCounterparty
+    type OpportunityWithCounterparty
 } from '../lib/db';
 import { detectLocation } from '../lib/location';
+import { rankMatches, type MatchResult, type MatchTier } from '../lib/matching';
 
 /* ─── Types ─── */
 interface SourcingForm {
@@ -77,8 +78,9 @@ const FindMaterials = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
     const [animateResults, setAnimateResults] = useState(false);
-    const [matches, setMatches] = useState<(WasteListingPublic & { distance_km?: number })[]>([]);
+    const [matches, setMatches] = useState<MatchResult[]>([]);
     const [sentOffers, setSentOffers] = useState<OpportunityWithCounterparty[]>([]);
+    const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
 
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 4;
@@ -162,44 +164,28 @@ const FindMaterials = () => {
             return;
         }
 
-        // 2. Perform Real-Time "AI" Matching
-        // Logic: Find waste_listings where waste_type matches material_needed
+        // 2. Smart Matching with Scoring Engine
         try {
             const allListings = await getAllWasteListings();
 
-            // Mock distance function since we don't have lat/long for all inputs
-            const calculateDistance = (loc1: string, loc2: string) => {
-                if (!loc1 || !loc2) return 999;
-                const l1 = loc1.toLowerCase();
-                const l2 = loc2.toLowerCase();
-                if (l1 === l2) return 0;
-                if (l1.includes(l2) || l2.includes(l1)) return 5;
-                let hash = 0;
-                const str = l1 < l2 ? l1 + l2 : l2 + l1;
-                for (let i = 0; i < str.length; i++) {
-                    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                    hash |= 0;
-                }
-                return Math.abs(hash % 150) + 10;
-            };
+            const scored = rankMatches(
+                {
+                    materialNeeded: form.materialNeeded,
+                    quantity: parseFloat(form.quantity),
+                    unit: form.unit,
+                    frequency: form.frequency,
+                    location: form.location,
+                    maxDistance: form.maxDistance ? parseFloat(form.maxDistance) : 200,
+                },
+                allListings
+            );
 
-            const maxDist = form.maxDistance ? parseFloat(form.maxDistance) : Infinity;
-
-            const filtered = allListings
-                .filter(l => l.waste_type === form.materialNeeded)
-                .map(l => {
-                    const dist = calculateDistance(form.location, l.listing_location || l.companies?.location || '');
-                    return { ...l, distance_km: dist };
-                })
-                .filter(l => l.distance_km <= maxDist)
-                .sort((a, b) => (a.distance_km || 0) - (b.distance_km || 0));
-
-            setMatches(filtered);
+            setMatches(scored);
         } catch (err) {
             console.error('[FindMaterials] matching error:', err);
         }
 
-        // Simulate AI matching delay for UX feel
+        // Simulate matching delay for UX feel
         setTimeout(() => {
             setIsSearching(false);
             setShowResults(true);
@@ -211,6 +197,12 @@ const FindMaterials = () => {
 
     const totalPages = Math.ceil(matches.length / ITEMS_PER_PAGE);
     const paginatedMatches = matches.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+    const tierConfig: Record<MatchTier, { label: string; color: string; bg: string; border: string }> = {
+        best: { label: 'Best Match', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' },
+        good: { label: 'Good Match', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' },
+        low: { label: 'Low Match', color: 'text-surface-500', bg: 'bg-surface-50', border: 'border-surface-200' },
+    };
 
     const inputClasses = "w-full bg-surface-50/80 border border-surface-200 rounded-xl px-4 py-3 text-[14px] text-surface-900 placeholder-surface-300 font-medium focus:outline-none focus:bg-white focus:border-brand-400 focus:ring-4 focus:ring-brand-500/8 transition-all";
     const selectClasses = `${inputClasses} appearance-none cursor-pointer`;
@@ -593,21 +585,28 @@ const FindMaterials = () => {
                             </div>
                         </div>
 
-                        {/* ─── AI Matching Results Section ─── */}
+                        {/* ─── Smart Matching Results Section ─── */}
                         <div className="p-8 border-t border-surface-100 bg-surface-50/30">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-2.5">
                                     <div className="w-9 h-9 rounded-xl bg-brand-500/10 flex items-center justify-center">
-                                        <Sparkles className="text-brand-600" size={18} />
+                                        <Target className="text-brand-600" size={18} />
                                     </div>
                                     <div>
-                                        <h4 className="text-[16px] font-extrabold text-surface-900">Top Matches Found</h4>
-                                        <p className="text-[12px] text-surface-500 font-medium">Verified waste streams matching your criteria</p>
+                                        <h4 className="text-[16px] font-extrabold text-surface-900">Smart Matches</h4>
+                                        <p className="text-[12px] text-surface-500 font-medium">Ranked by compatibility score (material, distance, quantity, timing)</p>
                                     </div>
                                 </div>
-                                <span className="bg-brand-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
-                                    {matches.length} matches
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    {matches.filter(m => m.tier === 'best').length > 0 && (
+                                        <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+                                            {matches.filter(m => m.tier === 'best').length} Best
+                                        </span>
+                                    )}
+                                    <span className="bg-brand-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
+                                        {matches.length} total
+                                    </span>
+                                </div>
                             </div>
 
                             {matches.length === 0 ? (
@@ -615,111 +614,142 @@ const FindMaterials = () => {
                                     <div className="w-16 h-16 rounded-full bg-surface-50 flex items-center justify-center mx-auto mb-4 border border-surface-100">
                                         <Search size={24} className="text-surface-300" />
                                     </div>
-                                    <h5 className="text-[15px] font-bold text-surface-900 mb-1">No direct matches yet</h5>
+                                    <h5 className="text-[15px] font-bold text-surface-900 mb-1">No matches found</h5>
                                     <p className="text-[13px] text-surface-400 font-medium max-w-xs mx-auto">
-                                        We couldn't find active listings for this material. Your request is live, and we'll notify you as soon as a supplier lists it.
+                                        No active listings scored above threshold. Your request is live — we'll notify you when a supplier lists compatible material.
                                     </p>
                                 </div>
                             ) : (
                                 <>
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                        {paginatedMatches.map(listing => (
-                                            <div key={listing.id} className="bg-white border border-surface-200 rounded-[24px] p-5 hover:shadow-xl hover:shadow-brand-500/2 transition-all group">
-                                                <div className="flex items-start justify-between mb-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-surface-50 flex items-center justify-center border border-surface-100 group-hover:bg-brand-50 group-hover:border-brand-200 transition-colors">
-                                                            <Package className="text-surface-400 group-hover:text-brand-600" size={20} />
+                                        {paginatedMatches.map(match => {
+                                            const listing = match.listing;
+                                            const tc = tierConfig[match.tier];
+                                            const isExpanded = expandedMatch === listing.id;
+
+                                            return (
+                                                <div key={listing.id} className={`bg-white border rounded-[24px] overflow-hidden hover:shadow-xl hover:shadow-brand-500/2 transition-all group ${match.tier === 'best' ? 'border-emerald-200 ring-1 ring-emerald-100' : 'border-surface-200'}`}>
+                                                    <div className="p-5">
+                                                        {/* Score + Tier Badge */}
+                                                        <div className="flex items-center justify-between mb-4">
+                                                            <div className="flex items-center gap-2.5">
+                                                                {/* Score Circle */}
+                                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-extrabold text-[16px] border ${tc.bg} ${tc.color} ${tc.border}`}>
+                                                                    {match.score}
+                                                                </div>
+                                                                <div>
+                                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${tc.bg} ${tc.color} ${tc.border} border`}>
+                                                                        {tc.label}
+                                                                    </span>
+                                                                    <h5 className="text-[14px] font-bold text-surface-900 capitalize leading-tight mt-1">
+                                                                        {listing.companies?.company_name || 'Verified Supplier'}
+                                                                    </h5>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="text-[16px] font-black text-brand-600 leading-none">
+                                                                    {listing.quantity} <span className="text-[11px] font-bold uppercase tracking-tighter opacity-70">{listing.unit}</span>
+                                                                </p>
+                                                                {listing.price_per_unit && (
+                                                                    <p className="text-[12px] font-bold text-surface-900 mt-1">
+                                                                        ₹{listing.price_per_unit}<span className="text-[10px] text-surface-400 font-medium">/{listing.unit}</span>
+                                                                    </p>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <h5 className="text-[14px] font-bold text-surface-900 capitalize leading-tight">
-                                                                {listing.companies?.company_name || 'Verified Supplier'}
-                                                            </h5>
-                                                            <div className="flex items-center gap-1.5 mt-1">
-                                                                <MapPin size={11} className="text-brand-500" />
-                                                                <span className="text-[11px] font-medium text-surface-400 truncate max-w-[150px]">
-                                                                    {listing.distance_km !== undefined ? `${listing.distance_km} km away` : (listing.listing_location || listing.companies?.location)}
-                                                                </span>
-                                                            </div>
-                                                            <div className="text-[10px] text-surface-400 truncate max-w-[150px] mt-0.5">
-                                                                {listing.listing_location || listing.companies?.location}
-                                                            </div>
+
+                                                        {/* Info row */}
+                                                        <div className="flex items-center gap-3 mb-3 text-[11px] font-medium text-surface-400">
+                                                            <div className="flex items-center gap-1"><MapPin size={11} className="text-brand-500" /> {listing.distance_km ?? '?'} km</div>
+                                                            <div className="flex items-center gap-1"><Clock size={11} className="text-surface-300" /> {listing.frequency}</div>
+                                                            <div className="flex items-center gap-1"><Factory size={11} className="text-surface-300" /> {listing.companies?.industry_type || 'Industry'}</div>
+                                                        </div>
+
+                                                        {/* Tags */}
+                                                        <div className="flex flex-wrap gap-2 mb-4">
+                                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border uppercase tracking-tight ${listing.hazard_level === 'non-hazardous' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                                                                {listing.hazard_level}
+                                                            </span>
+                                                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-surface-50 text-surface-500 border border-surface-100 uppercase tracking-tight">
+                                                                {listing.condition}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Score Breakdown Bars */}
+                                                        <div className="grid grid-cols-4 gap-1.5 mb-4">
+                                                            {[
+                                                                { label: 'Material', value: match.breakdown.materialScore, max: 40, color: 'bg-brand-500' },
+                                                                { label: 'Distance', value: match.breakdown.distanceScore, max: 25, color: 'bg-blue-500' },
+                                                                { label: 'Quantity', value: match.breakdown.quantityScore, max: 20, color: 'bg-amber-500' },
+                                                                { label: 'Timing', value: match.breakdown.timingScore, max: 15, color: 'bg-purple-500' },
+                                                            ].map(bar => (
+                                                                <div key={bar.label}>
+                                                                    <div className="flex items-center justify-between mb-1">
+                                                                        <span className="text-[9px] font-bold text-surface-400 uppercase tracking-wider">{bar.label}</span>
+                                                                        <span className="text-[9px] font-bold text-surface-600">{bar.value}/{bar.max}</span>
+                                                                    </div>
+                                                                    <div className="h-1.5 bg-surface-100 rounded-full overflow-hidden">
+                                                                        <div className={`h-full ${bar.color} rounded-full transition-all duration-700`} style={{ width: `${(bar.value / bar.max) * 100}%` }} />
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Actions */}
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                className="flex-1 py-3 bg-surface-900 hover:bg-black text-white rounded-xl text-[12px] font-bold transition-all flex items-center justify-center gap-2"
+                                                                onClick={() => navigate(`/app/messages?partnerId=${listing.company_id}`)}
+                                                            >
+                                                                Chat with Seller <ArrowRight size={14} />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setExpandedMatch(isExpanded ? null : listing.id)}
+                                                                className="px-3 py-3 bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-xl text-[12px] font-bold text-surface-600 transition-all flex items-center gap-1.5"
+                                                            >
+                                                                <Info size={13} />
+                                                                Why?
+                                                                {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <p className="text-[16px] font-black text-brand-600 leading-none">
-                                                            {listing.quantity} <span className="text-[11px] font-bold uppercase tracking-tighter opacity-70">{listing.unit}</span>
-                                                        </p>
-                                                        {listing.price_per_unit && (
-                                                            <p className="text-[12px] font-bold text-surface-900 mt-1">
-                                                                ₹{listing.price_per_unit}<span className="text-[10px] text-surface-400 font-medium tracking-tight">/{listing.unit}</span>
-                                                            </p>
-                                                        )}
-                                                        <p className="text-[10px] font-bold text-surface-300 mt-1 uppercase tracking-widest">{listing.frequency}</p>
-                                                    </div>
-                                                </div>
 
-                                                <div className="flex flex-wrap gap-2 mb-4">
-                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border uppercase tracking-tight ${listing.hazard_level === 'non-hazardous'
-                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                                                        : 'bg-amber-50 text-amber-700 border-amber-100'
-                                                        }`}>
-                                                        {listing.hazard_level}
-                                                    </span>
-                                                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-surface-50 text-surface-500 border border-surface-100 uppercase tracking-tight">
-                                                        {listing.condition}
-                                                    </span>
+                                                    {/* Expandable "Why this match?" Panel */}
+                                                    {isExpanded && (
+                                                        <div className="border-t border-surface-100 bg-surface-50/50 px-5 py-4 animate-fade-in">
+                                                            <div className="flex items-center gap-2 mb-3">
+                                                                <Zap size={14} className="text-brand-500" />
+                                                                <h6 className="text-[13px] font-bold text-surface-900">Why this match?</h6>
+                                                            </div>
+                                                            <ul className="space-y-2">
+                                                                {match.reasons.map((reason, i) => (
+                                                                    <li key={i} className="flex items-start gap-2 text-[12px] text-surface-600 font-medium">
+                                                                        <CheckCircle2 size={13} className="text-brand-500 shrink-0 mt-0.5" />
+                                                                        {reason}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    )}
                                                 </div>
-
-                                                <button
-                                                    className="w-full py-3 bg-surface-900 hover:bg-black text-white rounded-xl text-[12px] font-bold transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-surface-900/10"
-                                                    onClick={() => navigate(`/app/messages?partnerId=${listing.company_id}`)}
-                                                >
-                                                    Chat with Seller <ArrowRight size={14} />
-                                                </button>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
 
-                                    {/* Google Style Pagination */}
+                                    {/* Pagination */}
                                     {totalPages > 1 && (
-                                        <div className="flex flex-col items-center justify-center mt-10 mb-4 animate-fade-in">
-                                            <div className="flex items-end justify-center mb-1 select-none font-[Arial,sans-serif]">
-                                                <span className="text-[38px] font-bold text-surface-900 tracking-[-0.08em]">G</span>
-                                                {Array.from({ length: totalPages }).map((_, i) => (
-                                                    <span
-                                                        key={i + 1}
-                                                        onClick={() => setCurrentPage(i + 1)}
-                                                        className={`text-[38px] font-bold cursor-pointer transition-colors leading-[1.1] ${i + 1 === currentPage ? 'text-brand-500' : 'text-surface-900 hover:text-brand-400'}`}
-                                                    >
-                                                        o
-                                                    </span>
-                                                ))}
-                                                <span className="text-[38px] font-bold text-surface-900 tracking-[-0.02em]">gle</span>
-                                                {currentPage < totalPages && (
-                                                    <span onClick={() => setCurrentPage(p => p + 1)} className="text-[26px] mb-1.5 font-bold text-surface-400 ml-2 cursor-pointer hover:text-brand-500 transition-colors">
-                                                        ›
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            <div className="flex items-center justify-center gap-3">
+                                        <div className="flex items-center justify-center pt-8 pb-2">
+                                            <div className="flex items-center gap-1 bg-white px-3 py-2 rounded-2xl border border-surface-200 shadow-sm">
                                                 {Array.from({ length: totalPages }).map((_, i) => (
                                                     <button
                                                         key={i + 1}
                                                         onClick={() => setCurrentPage(i + 1)}
-                                                        className={`text-[14px] px-1 hover:underline ${i + 1 === currentPage ? 'text-surface-900 font-bold' : 'text-brand-600 font-medium'}`}
+                                                        className={`w-10 h-10 flex items-center justify-center rounded-xl text-[14px] font-bold transition-all ${currentPage === i + 1 ? 'bg-surface-900 text-white' : 'text-surface-600 hover:bg-surface-100'}`}
                                                     >
                                                         {i + 1}
                                                     </button>
                                                 ))}
-                                                {currentPage < totalPages && (
-                                                    <button
-                                                        onClick={() => setCurrentPage(p => p + 1)}
-                                                        className="text-[14px] font-medium text-brand-600 hover:underline ml-3"
-                                                    >
-                                                        Next
-                                                    </button>
-                                                )}
                                             </div>
                                         </div>
                                     )}

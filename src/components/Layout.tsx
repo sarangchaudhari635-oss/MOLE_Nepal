@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -18,9 +18,17 @@ import {
     MessageSquare,
     Orbit,
     TrendingUp,
-    CheckCircle2
+    CheckCircle2,
+    PieChart,
+    Loader
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
+import {
+    getMyNotifications, getUnreadNotificationCount,
+    markNotificationsRead, markOneNotificationRead,
+    type Notification
+} from '../lib/db';
 
 /* ─── Sidebar Item ─── */
 const SidebarItem = ({ icon: Icon, label, to, badge }: { icon: any; label: string; to: string; badge?: string }) => (
@@ -54,16 +62,86 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
     </p>
 );
 
+/* ─── Notification Type Config ─── */
+const notifTypeConfig: Record<string, { color: string; bg: string }> = {
+    match_found: { color: 'text-brand-600', bg: 'bg-brand-50' },
+    offer_received: { color: 'text-blue-600', bg: 'bg-blue-50' },
+    listing_expiring: { color: 'text-amber-600', bg: 'bg-amber-50' },
+    impact_milestone: { color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    system: { color: 'text-purple-600', bg: 'bg-purple-50' },
+    info: { color: 'text-surface-600', bg: 'bg-surface-50' },
+};
+
+const relativeTime = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+};
+
 
 const Layout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-    const [showNotification, setShowNotification] = useState(true);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [notifsLoading, setNotifsLoading] = useState(false);
     const location = useLocation();
     const { user, logout } = useAuth();
 
     const isProcessingScreen = location.pathname.includes('/processing');
     if (isProcessingScreen) return <Outlet />;
+
+    /* ─── Fetch notifications ─── */
+    const loadNotifications = useCallback(async () => {
+        setNotifsLoading(true);
+        const [notifs, count] = await Promise.all([
+            getMyNotifications(20),
+            getUnreadNotificationCount(),
+        ]);
+        setNotifications(notifs);
+        setUnreadCount(count);
+        setNotifsLoading(false);
+    }, []);
+
+    useEffect(() => {
+        loadNotifications();
+    }, [loadNotifications]);
+
+    /* ─── Real-time subscription ─── */
+    useEffect(() => {
+        const channel = supabase
+            .channel('notifications-rt')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, () => {
+                loadNotifications();
+            })
+            .subscribe();
+
+        return () => { channel.unsubscribe(); };
+    }, [loadNotifications]);
+
+    const handleOpenNotifications = () => {
+        setShowNotifications(!showNotifications);
+        if (!showNotifications) {
+            loadNotifications();
+        }
+    };
+
+    const handleMarkAllRead = async () => {
+        await markNotificationsRead();
+        setUnreadCount(0);
+        setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    };
+
+    const handleMarkOneRead = async (id: string) => {
+        await markOneNotificationRead(id);
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+    };
 
     return (
         <div className="min-h-screen bg-[#F5F6F8] flex text-surface-900 font-sans">
@@ -89,10 +167,11 @@ const Layout = () => {
                     <SidebarItem icon={Recycle} label="Find Materials" to="/app/find" />
                     <SidebarItem icon={MessageSquare} label="Messages" to="/app/messages" />
                     <SidebarItem icon={CheckCircle2} label="My Deals" to="/app/deals" />
-                    <SidebarItem icon={Lightbulb} label="Opportunities" to="/app/opportunities" badge="3" />
+                    <SidebarItem icon={Lightbulb} label="Opportunities" to="/app/opportunities" />
 
                     <SectionLabel>Analytics</SectionLabel>
                     <SidebarItem icon={BarChart3} label="Impact Analytics" to="/app/analytics" />
+                    <SidebarItem icon={PieChart} label="Waste Insights" to="/app/insights" />
                     <SidebarItem icon={Bot} label="AI Assistant" to="/app/chat" />
                     <SidebarItem icon={Clock} label="Trade History" to="/app/network" />
 
@@ -127,76 +206,108 @@ const Layout = () => {
                         >
                             <Settings size={18} />
                         </NavLink>
+
+                        {/* Notification Bell */}
                         <button
-                            onClick={() => setShowNotification(!showNotification)}
+                            onClick={handleOpenNotifications}
                             className="relative p-2.5 text-surface-500 hover:bg-surface-50 rounded-xl transition-colors"
                         >
                             <Bell size={18} />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1.5 right-1.5 min-w-[16px] h-[16px] bg-red-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center border-2 border-white px-1">
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
                         </button>
 
-                        {/* Dropdown Notification Popup */}
-                        {showNotification && (
-                            <div className="absolute top-full right-0 mt-3 w-screen max-w-[380px] z-[100] animate-slide-in-top">
-                                {/* Triangle Pointer */}
-                                <div className="absolute -top-1.5 right-4 w-4 h-4 bg-surface-900 rotate-45 border-l border-t border-white/10" />
+                        {/* ─── Notification Dropdown ─── */}
+                        {showNotifications && (
+                            <div className="absolute top-full right-0 mt-3 w-screen max-w-[400px] z-[100] animate-slide-in-top">
+                                <div className="absolute -top-1.5 right-4 w-4 h-4 bg-white rotate-45 border-l border-t border-surface-200" />
 
-                                <div className="bg-surface-900 border border-white/10 rounded-[24px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.3)] shadow-black/40 overflow-hidden relative group">
-                                    {/* Background Decoration */}
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/20 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16 group-hover:bg-brand-500/30 transition-colors" />
-
-                                    <div className="relative z-10">
-                                        <div className="flex items-start justify-between mb-5">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
-                                                    <Bell size={18} className="text-white animate-bounce" style={{ animationDuration: '3s' }} />
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-white font-bold text-[15px]">Smart Notification</h4>
-                                                    <p className="text-brand-400 text-[11px] font-bold uppercase tracking-wider">Live Activity</p>
-                                                </div>
+                                <div className="bg-white border border-surface-200 rounded-[24px] shadow-2xl shadow-black/10 overflow-hidden">
+                                    {/* Header */}
+                                    <div className="px-5 py-4 border-b border-surface-100 flex items-center justify-between">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-emerald-600 flex items-center justify-center shadow-sm">
+                                                <Bell size={14} className="text-white" />
                                             </div>
+                                            <div>
+                                                <h4 className="text-[14px] font-bold text-surface-900">Notifications</h4>
+                                                <p className="text-[11px] text-surface-400 font-medium">
+                                                    {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            {unreadCount > 0 && (
+                                                <button
+                                                    onClick={handleMarkAllRead}
+                                                    className="text-[11px] font-bold text-brand-600 hover:text-brand-700 px-2.5 py-1.5 rounded-lg hover:bg-brand-50 transition-colors"
+                                                >
+                                                    Mark all read
+                                                </button>
+                                            )}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); setShowNotification(false); }}
-                                                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all flex items-center justify-center border border-white/10"
+                                                onClick={() => setShowNotifications(false)}
+                                                className="w-7 h-7 rounded-full hover:bg-surface-100 text-surface-400 hover:text-surface-700 flex items-center justify-center transition-colors"
                                             >
-                                                <X size={16} />
+                                                <X size={14} />
                                             </button>
                                         </div>
+                                    </div>
 
-                                        <div className="space-y-4">
-                                            <div className="bg-white/5 border border-white/5 rounded-2xl p-4 hover:bg-white/10 transition-all cursor-pointer">
-                                                <p className="text-white/90 text-[14px] leading-relaxed">
-                                                    <span className="text-brand-400 font-bold">New Synergy!</span> Our AI engine identified a match for your <span className="text-white font-bold">Steel Slag</span> stream.
-                                                </p>
-                                                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/5">
-                                                    <div className="flex -space-x-2">
-                                                        {[1, 2, 3].map(i => (
-                                                            <div key={i} className="w-6 h-6 rounded-full border-2 border-surface-900 bg-surface-800 flex items-center justify-center overflow-hidden">
-                                                                <div className="bg-brand-500 w-full h-full opacity-60" />
+                                    {/* Notification List */}
+                                    <div className="max-h-[360px] overflow-y-auto custom-scrollbar">
+                                        {notifsLoading ? (
+                                            <div className="flex items-center justify-center py-10">
+                                                <Loader size={20} className="text-surface-300 animate-spin" />
+                                            </div>
+                                        ) : notifications.length === 0 ? (
+                                            <div className="py-10 text-center">
+                                                <Bell size={24} className="text-surface-200 mx-auto mb-2" />
+                                                <p className="text-[13px] text-surface-400 font-medium">No notifications yet</p>
+                                            </div>
+                                        ) : (
+                                            notifications.map(notif => {
+                                                const cfg = notifTypeConfig[notif.type] || notifTypeConfig.info;
+                                                return (
+                                                    <div
+                                                        key={notif.id}
+                                                        onClick={() => {
+                                                            if (!notif.is_read) handleMarkOneRead(notif.id);
+                                                            if (notif.action_url) {
+                                                                setShowNotifications(false);
+                                                                window.location.href = notif.action_url;
+                                                            }
+                                                        }}
+                                                        className={`px-5 py-3.5 border-b border-surface-50 cursor-pointer hover:bg-surface-50 transition-colors ${!notif.is_read ? 'bg-brand-50/30' : ''}`}
+                                                    >
+                                                        <div className="flex gap-3">
+                                                            <div className={`w-8 h-8 rounded-lg ${cfg.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+                                                                <Bell size={14} className={cfg.color} />
                                                             </div>
-                                                        ))}
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 mb-0.5">
+                                                                    <h5 className={`text-[13px] font-bold text-surface-900 truncate ${!notif.is_read ? '' : 'opacity-70'}`}>
+                                                                        {notif.title}
+                                                                    </h5>
+                                                                    {!notif.is_read && (
+                                                                        <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0" />
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-[12px] text-surface-500 font-medium line-clamp-2 leading-relaxed">
+                                                                    {notif.body}
+                                                                </p>
+                                                                <p className="text-[10px] text-surface-400 font-medium mt-1">
+                                                                    {relativeTime(notif.created_at)}
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-[11px] text-white/40 font-medium">+3 potential buyers</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex gap-3 pt-1">
-                                                <NavLink
-                                                    to="/app/opportunities"
-                                                    onClick={() => setShowNotification(false)}
-                                                    className="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl text-[13px] transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20 text-center"
-                                                >
-                                                    View Match
-                                                </NavLink>
-                                                <button
-                                                    onClick={() => setShowNotification(false)}
-                                                    className="px-4 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl text-[13px] border border-white/10 transition-all font-bold"
-                                                >
-                                                    Dismiss
-                                                </button>
-                                            </div>
-                                        </div>
+                                                );
+                                            })
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -244,3 +355,4 @@ const Layout = () => {
 };
 
 export default Layout;
+
