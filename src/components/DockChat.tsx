@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageSquare, Paperclip, Send, Bot, User, MapPin, Package } from 'lucide-react';
+import { X, MessageSquare, Send, Bot, User, MapPin, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { getAllWasteListings, type WasteListingPublic } from '../lib/db';
@@ -263,42 +263,66 @@ export const DockChat: React.FC<DockChatProps> = ({
                 )}
             </AnimatePresence>
 
-            <motion.button
-                onClick={handleToggle}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            <div
                 className={cn(
-                    "absolute pointer-events-auto rounded-full shadow-lg shadow-brand-500/30 flex items-center justify-center text-white z-20 transition-colors",
+                    "absolute pointer-events-auto flex items-center z-20",
                     positionClasses[position]
                 )}
-                style={{
-                    width: buttonSize,
-                    height: buttonSize,
-                    backgroundColor: buttonColor
-                }}
             >
-                <AnimatePresence mode="wait">
-                    {isOpen ? (
+                <AnimatePresence>
+                    {!isOpen && (
                         <motion.div
-                            key="close"
-                            initial={{ rotate: -90, opacity: 0 }}
-                            animate={{ rotate: 0, opacity: 1 }}
-                            exit={{ rotate: 90, opacity: 0 }}
+                            initial={{ opacity: 0, x: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            exit={{ opacity: 0, x: 10, scale: 0.95 }}
+                            transition={{ delay: 1.5, type: 'spring', stiffness: 200, damping: 20 }}
+                            className="absolute right-[calc(100%+14px)] bg-[#2a2a2a] text-white text-[15px] tracking-wide px-5 py-3 rounded-2xl shadow-xl border border-white/5 pointer-events-none whitespace-nowrap"
                         >
-                            <X size={24} />
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="open"
-                            initial={{ rotate: 90, opacity: 0 }}
-                            animate={{ rotate: 0, opacity: 1 }}
-                            exit={{ rotate: -90, opacity: 0 }}
-                        >
-                            <MessageSquare size={24} fill="currentColor" />
+                            Hey! I'm online now.
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </motion.button>
+
+                <motion.button
+                    onClick={handleToggle}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative rounded-full shadow-xl flex items-center justify-center text-white transition-colors border-[3px]"
+                    style={{
+                        width: buttonSize,
+                        height: buttonSize,
+                        backgroundColor: isOpen ? buttonColor : '#1a1a1a',
+                        borderColor: isOpen ? buttonColor : '#ff1cf7'
+                    }}
+                >
+                    <AnimatePresence mode="wait">
+                        {isOpen ? (
+                            <motion.div
+                                key="close"
+                                initial={{ rotate: -90, opacity: 0 }}
+                                animate={{ rotate: 0, opacity: 1 }}
+                                exit={{ rotate: 90, opacity: 0 }}
+                            >
+                                <X size={24} />
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="open"
+                                initial={{ scale: 0.5, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.5, opacity: 0 }}
+                                className="w-full h-full rounded-full overflow-hidden flex items-center justify-center p-0.5"
+                            >
+                                <img 
+                                    src="https://api.dicebear.com/7.x/notionists/svg?seed=MOLE&backgroundColor=transparent&face=smile" 
+                                    alt="AI Assistant" 
+                                    className="w-full h-full object-cover"
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.button>
+            </div>
         </div>
     );
 };
