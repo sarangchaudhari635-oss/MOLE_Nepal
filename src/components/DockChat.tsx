@@ -303,9 +303,9 @@ export const DockChat: React.FC<DockChatProps> = ({
                                 className="w-full h-full rounded-full overflow-hidden flex items-center justify-center p-0.5"
                             >
                                 <img 
-                                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=transparent" 
+                                    src="/ai_avatar.png" 
                                     alt="AI Assistant" 
-                                    className="w-full h-full object-cover scale-110 mt-1"
+                                    className="w-full h-full object-cover rounded-full"
                                 />
                             </motion.div>
                         )}
