@@ -110,6 +110,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (data.user) {
             setUser(buildProfile(data.user, company));
+
+            // Send welcome notification
+            try {
+                await supabase.from('notifications').insert({
+                    company_id: data.user.id,
+                    type: 'system',
+                    title: '🎉 Welcome to MOLE!',
+                    body: `Welcome aboard, ${email.split('@')[0]}! Your company "${company}" is now live on the circular economy platform. Start by listing your waste or searching for materials.`,
+                    action_url: '/app',
+                    is_read: false,
+                });
+            } catch (e) {
+                console.warn('Could not create welcome notification:', e);
+            }
         }
 
         return { error: null };

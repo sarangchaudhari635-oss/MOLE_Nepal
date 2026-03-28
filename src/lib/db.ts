@@ -280,6 +280,21 @@ export async function createWasteListing(
         .select()
         .single();
     if (error) return { data: null, error: error.message };
+
+    // Self-notification confirming listing posted
+    try {
+        await supabase.from('notifications').insert({
+            company_id: user.id,
+            type: 'system',
+            title: '📦 New Listing Published',
+            body: `Your waste listing "${payload.waste_type}" (${payload.quantity} ${payload.unit}) is now live on the marketplace. Buyers can find and send you offers.`,
+            action_url: '/app',
+            is_read: false,
+        });
+    } catch (e) {
+        console.warn('[db] createWasteListing notification skipped:', e);
+    }
+
     return { data: data as WasteListing, error: null };
 }
 
@@ -355,6 +370,27 @@ export async function sendOffer(payload: {
         status: 'active',
     });
     if (error) return { error: error.message };
+
+    // Notify the listing owner about the new interest
+    try {
+        const { data: buyerCompany } = await supabase
+            .from('companies')
+            .select('company_name')
+            .eq('id', user.id)
+            .single();
+
+        await supabase.from('notifications').insert({
+            company_id: payload.counterparty_id,
+            type: 'offer_received',
+            title: '🔔 New Buyer Interest',
+            body: `${buyerCompany?.company_name || 'A company'} is interested in your material "${payload.material_from}". Check your Opportunities to review the offer.`,
+            action_url: '/app/opportunities',
+            is_read: false,
+        });
+    } catch (e) {
+        console.warn('[db] sendOffer notification skipped:', e);
+    }
+
     return { error: null };
 }
 
@@ -680,6 +716,27 @@ export async function sendMessage(payload: {
         .single();
 
     if (error) return { data: null, error: error.message };
+
+    // Notify the receiver about the new message
+    try {
+        const { data: senderCompany } = await supabase
+            .from('companies')
+            .select('company_name')
+            .eq('id', user.id)
+            .single();
+
+        await supabase.from('notifications').insert({
+            company_id: payload.receiver_id,
+            type: 'info',
+            title: '💬 New Message',
+            body: `${senderCompany?.company_name || 'A trading partner'} sent you a message: "${payload.content.substring(0, 80)}${payload.content.length > 80 ? '...' : ''}"`,
+            action_url: `/app/messages?partnerId=${user.id}`,
+            is_read: false,
+        });
+    } catch (e) {
+        console.warn('[db] sendMessage notification skipped:', e);
+    }
+
     return { data: data as Message, error: null };
 }
 

@@ -20,7 +20,9 @@ import {
     TrendingUp,
     CheckCircle2,
     PieChart,
-    Loader
+    Loader,
+    Moon,
+    Sun
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -90,11 +92,30 @@ const Layout = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifsLoading, setNotifsLoading] = useState(false);
+    const [darkMode, setDarkMode] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('mole-dark-mode') === 'true';
+        }
+        return false;
+    });
     const location = useLocation();
     const { user, logout } = useAuth();
 
     const isProcessingScreen = location.pathname.includes('/processing');
     if (isProcessingScreen) return <Outlet />;
+
+    /* ─── Dark mode toggle ─── */
+    const toggleDarkMode = () => {
+        const next = !darkMode;
+        setDarkMode(next);
+        document.documentElement.classList.toggle('dark', next);
+        localStorage.setItem('mole-dark-mode', String(next));
+    };
+
+    // Apply dark mode on mount
+    useEffect(() => {
+        document.documentElement.classList.toggle('dark', darkMode);
+    }, []);
 
     /* ─── Fetch notifications ─── */
     const loadNotifications = useCallback(async () => {
@@ -177,6 +198,17 @@ const Layout = () => {
 
                     <SectionLabel>System</SectionLabel>
                     <SidebarItem icon={FileText} label="Reports" to="/app/reports" />
+                </div>
+
+                {/* Dark Mode Toggle — Sidebar Bottom */}
+                <div className="px-3 py-3 border-t border-surface-100 shrink-0">
+                    <button
+                        onClick={toggleDarkMode}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-surface-800/80 hover:bg-surface-50 hover:text-surface-900 font-medium border border-transparent"
+                    >
+                        {darkMode ? <Sun size={18} className="text-amber-500" /> : <Moon size={18} className="text-surface-300" />}
+                        <span className="text-[14px]">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                    </button>
                 </div>
 
             </aside>

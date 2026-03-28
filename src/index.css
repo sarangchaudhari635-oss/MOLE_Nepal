@@ -11,7 +11,108 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
+}
+
+/* ═══════════════════════════════════
+   DARK MODE OVERRIDES
+   ═══════════════════════════════════ */
+.dark body,
+html.dark body {
+  background-color: #0F1117;
+  color: #E5E5EA;
+}
+
+/* Main layout background */
+html.dark .bg-\[\#F5F6F8\] { background-color: #0F1117 !important; }
+html.dark .bg-surface-50 { background-color: #0F1117 !important; }
+html.dark .bg-surface-50\/30 { background-color: rgba(15,17,23,0.3) !important; }
+html.dark .bg-\[rgb\(248\,249\,250\)\] { background-color: #0F1117 !important; }
+
+/* White cards and panels → dark panels */
+html.dark .bg-white { background-color: #1A1D27 !important; }
+html.dark .bg-white\/80 { background-color: rgba(26,29,39,0.85) !important; }
+html.dark .bg-\[\#F9FBFC\] { background-color: #12141C !important; }
+
+/* Surface backgrounds */
+html.dark .bg-surface-50\/20 { background-color: rgba(15,17,23,0.5) !important; }
+html.dark .bg-surface-100 { background-color: #22252F !important; }
+
+/* Surface-50 backgrounds (form inputs, subtle fills) */
+html.dark .bg-surface-50\/80 { background-color: rgba(26,29,39,0.8) !important; }
+
+/* Text overrides */
+html.dark .text-surface-900 { color: #F0F0F5 !important; }
+html.dark .text-surface-800 { color: #D8D8E0 !important; }
+html.dark .text-surface-800\/80 { color: rgba(216,216,224,0.8) !important; }
+html.dark .text-surface-700 { color: #B0B0BA !important; }
+html.dark .text-surface-600 { color: #9090A0 !important; }
+html.dark .text-surface-500 { color: #7A7A8A !important; }
+html.dark .text-surface-400 { color: #6A6A7A !important; }
+html.dark .text-surface-300 { color: #5A5A6A !important; }
+
+/* Borders */
+html.dark .border-surface-200\/60 { border-color: rgba(50,53,65,0.6) !important; }
+html.dark .border-surface-200 { border-color: #2A2D37 !important; }
+html.dark .border-surface-200\/40 { border-color: rgba(50,53,65,0.4) !important; }
+html.dark .border-surface-200\/50 { border-color: rgba(50,53,65,0.5) !important; }
+html.dark .border-surface-100 { border-color: #22252F !important; }
+html.dark .border-surface-50 { border-color: #1C1F29 !important; }
+
+/* Hover states */
+html.dark .hover\:bg-surface-50:hover { background-color: #22252F !important; }
+html.dark .hover\:bg-surface-100:hover { background-color: #2A2D37 !important; }
+html.dark .hover\:bg-white:hover { background-color: #22252F !important; }
+
+/* Brand-50 active sidebar item etc */
+html.dark .bg-brand-50 { background-color: rgba(16,185,129,0.1) !important; }
+html.dark .border-brand-100\/60 { border-color: rgba(16,185,129,0.15) !important; }
+html.dark .bg-brand-50\/30 { background-color: rgba(16,185,129,0.05) !important; }
+
+/* Card shadows in dark mode */
+html.dark .shadow-\[0_1px_3px_rgba\(0\,0\,0\,0\.02\)\] { box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important; }
+html.dark .shadow-\[2px_0_20px_rgba\(0\,0\,0\,0\.02\)\] { box-shadow: 2px 0 20px rgba(0,0,0,0.3) !important; }
+
+/* Notification dropdown */
+html.dark .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5) !important; }
+
+/* Input fields in dark mode */
+html.dark input, html.dark textarea, html.dark select {
+  background-color: #22252F !important;
+  border-color: #2A2D37 !important;
+  color: #E5E5EA !important;
+}
+html.dark input::placeholder, html.dark textarea::placeholder {
+  color: #5A5A6A !important;
+}
+html.dark input:focus, html.dark textarea:focus, html.dark select:focus {
+  border-color: #10B981 !important;
+  background-color: #1A1D27 !important;
+}
+
+/* Dashed borders */
+html.dark .border-dashed { border-color: #2A2D37 !important; }
+
+/* Modal overlays */
+html.dark .bg-surface-900\/60 { background-color: rgba(0,0,0,0.7) !important; }
+html.dark .bg-surface-900\/40 { background-color: rgba(0,0,0,0.6) !important; }
+
+/* Recharts dark mode */
+html.dark .recharts-cartesian-grid-horizontal line,
+html.dark .recharts-cartesian-grid-vertical line {
+  stroke: #2A2D37 !important;
+}
+html.dark .recharts-text { fill: #7A7A8A !important; }
+
+/* Scrollbar dark */
+html.dark ::-webkit-scrollbar-thumb { background: #2A2D37; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: #3A3D47; }
+
+/* Selection in dark mode */
+html.dark ::selection {
+  background-color: rgba(16,185,129,0.3);
+  color: #E5E5EA;
 }
 
 ::selection {
