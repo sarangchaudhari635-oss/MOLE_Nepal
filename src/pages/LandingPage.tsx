@@ -441,41 +441,41 @@ const LandingPage = () => {
             </section>
 
             {/* ─── Impact Metrics ─── */}
-            <section id="metrics" className="py-28 bg-surface-900 dark:bg-[#0a0c12] text-white relative overflow-hidden">
-                <div className="absolute inset-0 opacity-[0.06]">
-                    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <section id="metrics" className="py-28 bg-[#F6F8FA] dark:bg-[#0a0c12] text-surface-900 dark:text-white relative overflow-hidden transition-colors duration-300">
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]">
+                    <svg className="w-full h-full text-surface-900 dark:text-white" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <pattern id="grid-dark" width="60" height="60" patternUnits="userSpaceOnUse">
-                                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="0.5" />
+                            <pattern id="grid-impact" width="60" height="60" patternUnits="userSpaceOnUse">
+                                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" strokeWidth="1" />
                             </pattern>
                         </defs>
-                        <rect width="100%" height="100%" fill="url(#grid-dark)" />
+                        <rect width="100%" height="100%" fill="url(#grid-impact)" />
                     </svg>
                 </div>
                 {/* Glow orb */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500 rounded-full blur-[200px] opacity-[0.08] pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500 rounded-full blur-[200px] opacity-[0.04] dark:opacity-[0.08] pointer-events-none" />
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-16">
-                        <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white/80 text-[13px] font-semibold mb-4 border border-white/10">
+                        <div className="inline-block px-4 py-1.5 rounded-full bg-brand-50 text-brand-700 dark:bg-white/10 dark:text-white/80 text-[13px] font-semibold mb-4 border border-brand-100 dark:border-white/10">
                             Platform Impact
                         </div>
                         <h2 className="text-3xl md:text-[42px] font-extrabold tracking-tight mb-4 leading-tight">Driving Measurable Outcomes</h2>
-                        <p className="text-lg text-surface-300/80">Real results from real industrial symbiosis partnerships.</p>
+                        <p className="text-lg text-surface-600 dark:text-surface-300/80">Real results from real industrial symbiosis partnerships.</p>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-0 lg:divide-x lg:divide-white/10">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-0 lg:divide-x divide-surface-200 dark:divide-white/10">
                         {[
-                            { ref: waste.ref, value: formatNum(waste.count), suffix: '+', label: 'Tons Waste Diverted', color: 'from-white to-surface-300' },
-                            { ref: co2.ref, value: formatNum(co2.count), suffix: ' MT', label: 'CO₂e Saved', color: 'from-white to-surface-300' },
-                            { ref: savings.ref, value: '$' + savings.count, suffix: 'M+', label: 'Cost Savings Generated', color: 'from-emerald-400 to-brand-500' },
-                            { ref: exchanges.ref, value: exchanges.count.toLocaleString(), suffix: '+', label: 'Active Exchanges', color: 'from-white to-surface-300' }
+                            { ref: waste.ref, value: formatNum(waste.count), suffix: '+', label: 'Tons Waste Diverted', color: 'from-surface-900 to-surface-600 dark:from-white dark:to-surface-300' },
+                            { ref: co2.ref, value: formatNum(co2.count), suffix: ' MT', label: 'CO₂e Saved', color: 'from-surface-900 to-surface-600 dark:from-white dark:to-surface-300' },
+                            { ref: savings.ref, value: '$' + savings.count, suffix: 'M+', label: 'Cost Savings Generated', color: 'from-brand-600 to-emerald-500 dark:from-emerald-400 dark:to-brand-500' },
+                            { ref: exchanges.ref, value: exchanges.count.toLocaleString(), suffix: '+', label: 'Active Exchanges', color: 'from-surface-900 to-surface-600 dark:from-white dark:to-surface-300' }
                         ].map((m, i) => (
                             <div key={i} ref={m.ref} className="flex flex-col items-center text-center lg:px-8">
                                 <span className={`text-4xl md:text-[52px] font-extrabold text-transparent bg-clip-text bg-gradient-to-b ${m.color} mb-2 tracking-tight leading-none`}>
                                     {m.value}{m.suffix}
                                 </span>
-                                <span className="text-sm font-medium text-brand-400/90">{m.label}</span>
+                                <span className="text-sm font-semibold text-brand-600 dark:text-brand-400/90">{m.label}</span>
                             </div>
                         ))}
                     </div>
