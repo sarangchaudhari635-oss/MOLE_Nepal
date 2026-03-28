@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, MapPin, Package, MessageSquare } from 'lucide-react';
+import { Send, Bot, User, Sparkles, MapPin, Package, MessageSquare, Trash2 } from 'lucide-react';
 import { getAllWasteListings, type WasteListingPublic } from '../lib/db';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,7 +19,14 @@ const initialMessages: ChatMessage[] = [
 ];
 
 const AIChat = () => {
-    const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+    const [messages, setMessages] = useState<ChatMessage[]>(() => {
+        try {
+            const saved = localStorage.getItem('ai_chat_memory');
+            return saved ? JSON.parse(saved) : initialMessages;
+        } catch (e) {
+            return initialMessages;
+        }
+    });
     const [input, setInput] = useState('');
     const [allListings, setAllListings] = useState<WasteListingPublic[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -30,6 +37,11 @@ const AIChat = () => {
     };
 
     useEffect(() => {
+        try {
+            localStorage.setItem('ai_chat_memory', JSON.stringify(messages));
+        } catch (e) {
+            console.error('Failed to save chat memory', e);
+        }
         scrollToBottom();
     }, [messages]);
 
@@ -110,6 +122,16 @@ const AIChat = () => {
                         Find sellers, get project info, and more.
                     </p>
                 </div>
+                <button
+                    onClick={() => {
+                        setMessages(initialMessages);
+                        localStorage.removeItem('ai_chat_memory');
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-bold text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                    <Trash2 size={16} />
+                    Clear Chat
+                </button>
             </div>
 
             {/* Chat Area */}
