@@ -549,7 +549,7 @@ const Messages = () => {
                             if (!selectedPartner) return;
 
                             setIsFinalizing(true);
-                            await finalizeDeal({
+                            const res = await finalizeDeal({
                                 partner_id: selectedPartner.partner_id,
                                 role: dealForm.role,
                                 material: dealForm.material,
@@ -562,8 +562,12 @@ const Messages = () => {
 
                             setIsFinalizing(false);
                             setShowDealModal(false);
-                            setDealForm({ material: '', amount: '', price: '', notes: '', role: 'seller' }); // Reset
-                            navigate('/app/deals');
+                            if (res.newStatus === 'active') {
+                                setDealForm({ material: '', amount: '', price: '', notes: '', role: 'seller' }); // Reset
+                                navigate('/app/deals');
+                            } else if (res.newStatus === 'pending_confirmation') {
+                                setDealStatus('pending_confirmation');
+                            }
                         }} className="p-6 space-y-4">
 
                             {/* Role Selector */}

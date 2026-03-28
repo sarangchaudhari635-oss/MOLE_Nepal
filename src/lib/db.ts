@@ -1099,7 +1099,7 @@ export async function getMyDeals(): Promise<Transaction[]> {
             seller:companies!seller_id(company_name),
             buyer:companies!buyer_id(company_name)
         `)
-        .neq('status', 'draft')
+        .in('status', ['active', 'completed', 'cancelled'])
         .or(`seller_id.eq.${user.id},buyer_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
@@ -1120,7 +1120,7 @@ export async function finalizeDeal(payload: {
     notes?: string;
     opportunity_id?: string;
     transaction_id?: string;
-}): Promise<{ error: string | null }> {
+}): Promise<{ error: string | null; newStatus?: string }> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Not authenticated' };
 
@@ -1138,7 +1138,7 @@ export async function finalizeDeal(payload: {
         // If it's already pending_confirmation, that means the OTHER user initiated the finalization (assuming they didn't double click). 
         // We will finalize it fully.
         const newStatus = txn.status === 'pending_confirmation' ? 'active' : 'pending_confirmation';
-        const newStage = txn.status === 'pending_confirmation' ? 'in_discussion' : 'interested'; // Moves to discussion or next stage
+        const newStage = 'agreement'; // First stage of the pipeline
 
         const { error: updateErr } = await supabase
             .from('transactions')
@@ -1173,7 +1173,7 @@ export async function finalizeDeal(payload: {
             });
         } catch (e) { console.warn('Notification failed', e); }
 
-        return { error: null };
+        return { error: null, newStatus };
     }
 
     return { error: 'No transaction ID provided' };
