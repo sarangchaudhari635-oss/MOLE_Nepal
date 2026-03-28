@@ -1074,7 +1074,7 @@ export async function getDraftDeal(partner_id: string): Promise<Transaction | nu
     const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .eq('status', 'draft')
+        .in('status', ['draft', 'pending_confirmation'])
         .or(`seller_id.eq.${user.id},buyer_id.eq.${user.id}`)
         .or(`seller_id.eq.${partner_id},buyer_id.eq.${partner_id}`)
         .order('created_at', { ascending: false })
@@ -1124,33 +1124,59 @@ export async function finalizeDeal(payload: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Not authenticated' };
 
-    // Call the RPC function for atomic updates
-    const { error: rpcError } = await supabase.rpc('finalize_deal', {
-        p_partner_id: payload.partner_id,
-        p_role: payload.role,
-        p_material: payload.material,
-        p_amount: payload.amount,
-        p_price: payload.price,
-        p_notes: payload.notes,
-        p_opportunity_id: payload.opportunity_id || null,
-        p_transaction_id: payload.transaction_id || null
-    });
+    // Update the transaction
+    if (payload.transaction_id) {
+        // Fetch current transaction
+        const { data: txn, error: fetchErr } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('id', payload.transaction_id)
+            .single();
+            
+        if (fetchErr) return { error: fetchErr.message };
 
-    if (rpcError) {
-        console.error('finalize_deal RPC failed:', rpcError);
-        return { error: rpcError.message };
+        // If it's already pending_confirmation, that means the OTHER user initiated the finalization (assuming they didn't double click). 
+        // We will finalize it fully.
+        const newStatus = txn.status === 'pending_confirmation' ? 'active' : 'pending_confirmation';
+        const newStage = txn.status === 'pending_confirmation' ? 'in_discussion' : 'interested'; // Moves to discussion or next stage
+
+        const { error: updateErr } = await supabase
+            .from('transactions')
+            .update({ 
+                status: newStatus,
+                stage: newStage
+            })
+            .eq('id', payload.transaction_id);
+
+        if (updateErr) return { error: updateErr.message };
+
+        // Send Custom Message
+        const msgContent = newStatus === 'active' 
+            ? `**DEAL FULLY CONFIRMED** 🤝\nBoth parties have agreed to the terms.\n• Material: ${payload.material}\n• Amount: ${payload.amount}\n• Price: ${payload.price}\n\nThe deal is now active in your pipeline.`
+            : `**DEAL CONFIRMATION REQUESTED** ⏳\nI have confirmed the deal from my end. Please review the terms and click 'Confirm Deal' to finalize.\n• Role: ${payload.role.toUpperCase()}\n• Material: ${payload.material}\n• Amount: ${payload.amount}\n• Price: ${payload.price}\n• Notes: ${payload.notes || 'N/A'}`;
+        
+        await sendMessage({
+            receiver_id: payload.partner_id,
+            content: msgContent,
+            opportunity_id: payload.opportunity_id
+        });
+        
+        // Notify the partner
+        try {
+            await supabase.from('notifications').insert({
+                company_id: payload.partner_id,
+                type: 'system',
+                title: newStatus === 'active' ? '🤝 Deal Confirmed!' : '📝 Deal Awaiting Your Approval',
+                body: newStatus === 'active' ? `The deal for ${payload.material} has been finalized by both parties.` : `Please review and confirm the draft deal for ${payload.material}.`,
+                action_url: `/app/messages?partnerId=${user.id}`,
+                is_read: false,
+            });
+        } catch (e) { console.warn('Notification failed', e); }
+
+        return { error: null };
     }
 
-    // Send Confirmation Message
-    const msgContent = `**DEAL FINALIZED** ✅\n• Role: ${payload.role.toUpperCase()}\n• Material: ${payload.material}\n• Amount: ${payload.amount}\n• Price: ${payload.price}\n• Notes: ${payload.notes || 'N/A'}\n\nTransaction recorded. Impact metrics updated. Check 'My Deals' for progress.`;
-    
-    await sendMessage({
-        receiver_id: payload.partner_id,
-        content: msgContent,
-        opportunity_id: payload.opportunity_id
-    });
-
-    return { error: null };
+    return { error: 'No transaction ID provided' };
 }
 
 export async function createNetworkConnection(

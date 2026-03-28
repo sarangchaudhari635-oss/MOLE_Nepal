@@ -29,6 +29,7 @@ const Messages = () => {
     // Deal/Draft State
     const [hasDraft, setHasDraft] = useState(false);
     const [draftId, setDraftId] = useState<string | null>(null);
+    const [dealStatus, setDealStatus] = useState<string | null>(null);
     const [showDraftModal, setShowDraftModal] = useState(false);
     const [showDealModal, setShowDealModal] = useState(false);
     const [dealForm, setDealForm] = useState<{
@@ -97,11 +98,11 @@ const Messages = () => {
                 c.partner_id === selectedPartner.partner_id ? { ...c, unread_count: 0 } : c
             ));
 
-            // Load Draft Deal if exists
             const draft = await getDraftDeal(selectedPartner.partner_id);
             if (draft) {
                 setHasDraft(true);
                 setDraftId(draft.id);
+                setDealStatus(draft.status);
                 // Pre-fill form
                 const { data: { user } } = await supabase.auth.getUser();
                 const amISeller = draft.seller_id === user?.id;
@@ -115,6 +116,7 @@ const Messages = () => {
             } else {
                 setHasDraft(false);
                 setDraftId(null);
+                setDealStatus(null);
                 setDealForm({ material: '', amount: '', price: '', notes: '', role: 'seller' });
             }
         };
@@ -294,6 +296,45 @@ const Messages = () => {
 
                         {/* Messages Area */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-4" ref={scrollRef}>
+                            {!(messages.length > 0 || isChatStarted || hasDraft) ? (
+                                <div className="h-full flex flex-col items-center justify-center text-center animate-fade-in py-10">
+                                    <div className="w-20 h-20 rounded-3xl bg-surface-50 flex items-center justify-center mb-6 border border-surface-100 shadow-inner">
+                                        <MessageSquare size={32} className="text-surface-300" />
+                                    </div>
+                                    <h2 className="text-[22px] font-extrabold text-surface-900 mb-3">Start a Trade Transaction</h2>
+                                    <p className="text-[14px] text-surface-500 max-w-[380px] font-medium leading-relaxed mb-8">
+                                        Are you looking to supply waste materials to <span className="text-surface-800 font-bold">{selectedPartner.partner_name}</span>, or are you acting as the buyer? Propose a Draft Deal to begin.
+                                    </p>
+                                    
+                                    <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-[500px] mb-8">
+                                        <button 
+                                            onClick={() => { setDealForm(prev => ({...prev, role: 'seller'})); setShowDraftModal(true); setIsChatStarted(true); }} 
+                                            className="flex-1 px-4 py-4 bg-white border-2 border-brand-200 text-brand-700 hover:bg-brand-50 font-bold rounded-2xl transition-all shadow-sm flex flex-col items-center gap-2 group"
+                                        >
+                                            <span className="bg-brand-100 text-brand-700 p-2 rounded-full group-hover:scale-110 transition-transform">
+                                                <Building2 size={20} />
+                                            </span>
+                                            I am the Seller
+                                        </button>
+                                        <button 
+                                            onClick={() => { setDealForm(prev => ({...prev, role: 'buyer'})); setShowDraftModal(true); setIsChatStarted(true); }} 
+                                            className="flex-1 px-4 py-4 bg-white border-2 border-surface-200 text-surface-700 hover:bg-surface-50 font-bold rounded-2xl transition-all shadow-sm flex flex-col items-center gap-2 group"
+                                        >
+                                            <span className="bg-surface-100 text-surface-600 p-2 rounded-full group-hover:scale-110 transition-transform">
+                                                <CheckCircle2 size={20} />
+                                            </span>
+                                            I am the Buyer
+                                        </button>
+                                    </div>
+                                    
+                                    <button 
+                                        onClick={() => setIsChatStarted(true)} 
+                                        className="text-surface-400 font-semibold hover:text-brand-500 hover:underline transition-colors text-[13px]"
+                                    >
+                                        Or skip generating a draft and just send a message
+                                    </button>
+                                </div>
+                            ) : null}
 
                             {messages.map((msg, i) => {
                                 const isMine = msg.sender_id === myId;
@@ -340,26 +381,21 @@ const Messages = () => {
                         <div className="p-4 bg-white border-t border-surface-100">
                             <div className="flex items-center gap-2 mb-3">
                                 {!(messages.length > 0 || isChatStarted) ? (
-                                    <button
-                                        onClick={() => setIsChatStarted(true)}
-                                        className="px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-[12px] font-bold transition-colors"
-                                    >
-                                        Let's Talk
-                                    </button>
+                                    <span className="text-surface-400 text-[12px] font-medium px-2 py-1">Ready to connect...</span>
                                 ) : (
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setShowDraftModal(true)}
-                                            className="px-4 py-2 bg-white border border-brand-200 text-brand-600 hover:bg-brand-50 rounded-xl text-[12px] font-bold transition-colors flex items-center gap-1.5"
+                                            className="px-4 py-2 bg-white border border-brand-200 text-brand-600 hover:bg-brand-50 rounded-xl text-[12px] font-bold transition-colors flex items-center gap-1.5 shadow-sm"
                                         >
-                                            <FileEdit size={14} /> {hasDraft ? 'Edit Draft' : 'Draft Deal'}
+                                            <FileEdit size={14} /> {hasDraft ? 'View/Edit Draft' : 'Draft Deal'}
                                         </button>
                                         <button
                                             disabled={!hasDraft}
                                             onClick={() => setShowDealModal(true)}
-                                            className={`px-4 py-2 text-white rounded-xl text-[12px] font-bold transition-colors shadow-sm shadow-brand-500/20 flex items-center gap-1.5 ${!hasDraft ? 'bg-surface-300 cursor-not-allowed opacity-70' : 'bg-brand-500 hover:bg-brand-600'}`}
+                                            className={`px-4 py-2 text-white rounded-xl text-[12px] font-bold transition-colors shadow-sm shadow-brand-500/20 flex items-center gap-1.5 ${!hasDraft ? 'bg-surface-300 cursor-not-allowed opacity-70' : dealStatus === 'pending_confirmation' ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20' : 'bg-brand-500 hover:bg-brand-600'}`}
                                         >
-                                            <CheckCircle2 size={14} /> Deal Done
+                                            <CheckCircle2 size={14} /> {dealStatus === 'pending_confirmation' ? 'Review & Confirm' : 'Finalize Deal'}
                                         </button>
                                     </div>
                                 )}
@@ -503,7 +539,7 @@ const Messages = () => {
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-surface-900/40 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-md border border-surface-200/60 overflow-hidden">
                         <div className="px-6 py-4 border-b border-surface-100 flex justify-between items-center bg-surface-50">
-                            <h3 className="text-[16px] font-bold text-surface-900">Finalize Deal Parameters</h3>
+                            <h3 className="text-[16px] font-bold text-surface-900">{dealStatus === 'pending_confirmation' ? 'Confirm Pending Deal' : 'Finalize Deal Parameters'}</h3>
                             <button onClick={() => setShowDealModal(false)} className="text-surface-400 hover:text-surface-600 transition-colors">
                                 <X size={18} />
                             </button>
