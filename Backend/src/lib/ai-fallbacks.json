@@ -1,0 +1,50 @@
+{
+  "wood_dust": {
+    "material_type": "Hardwood offcuts and sawdust",
+    "category_code": "wood_biomass",
+    "estimated_purity_pct": 82,
+    "condition": "Clean",
+    "price_range_npr": {
+      "min": 4,
+      "max": 7
+    },
+    "buyer_industries": [
+      "Biomass energy plants",
+      "Paper mills",
+      "Particle board factories"
+    ],
+    "listing_title_suggestion": "Hardwood Offcuts & Sawdust — 300 kg/week | काठको धुलो तथा टुक्राहरू"
+  },
+  "plastic_hdpe": {
+    "material_type": "HDPE plastic offcuts and pellets",
+    "category_code": "plastic_hdpe",
+    "estimated_purity_pct": 75,
+    "condition": "Clean",
+    "price_range_npr": {
+      "min": 20,
+      "max": 35
+    },
+    "buyer_industries": [
+      "Eco-brick manufacturers",
+      "Plastic recyclers",
+      "Construction companies"
+    ],
+    "listing_title_suggestion": "HDPE Plastic Offcuts — 500 kg/week | एचडीपीई प्लास्टिक अफकट्स"
+  },
+  "metal_ferrous": {
+    "material_type": "Iron and steel shavings from machining",
+    "category_code": "metal_ferrous",
+    "estimated_purity_pct": 90,
+    "condition": "Clean",
+    "price_range_npr": {
+      "min": 15,
+      "max": 25
+    },
+    "buyer_industries": [
+      "Foundries",
+      "Rebar manufacturers",
+      "Construction companies"
+    ],
+    "listing_title_suggestion": "Iron Metal Shavings — 80 kg/week | फलामको धातु छिलकाहरू"
+  }
+}

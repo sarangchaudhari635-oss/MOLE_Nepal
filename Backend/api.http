@@ -1,0 +1,192 @@
+### MOLE Backend API — REST Client
+### Requires VS Code REST Client extension (or use as reference)
+### Base URL: http://localhost:5000
+
+@baseUrl = http://localhost:5000
+@token = YOUR_JWT_TOKEN_HERE
+
+# ─────────────────────────────────────────────────
+# HEALTH
+# ─────────────────────────────────────────────────
+
+### Health Check
+GET {{baseUrl}}/health
+
+# ─────────────────────────────────────────────────
+# AUTH
+# ─────────────────────────────────────────────────
+
+### Register (Generator)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test.generator@mole.np",
+  "password": "password123",
+  "full_name": "Test Generator",
+  "role": "generator",
+  "location": "Bhaktapur"
+}
+
+###
+
+### Register (Buyer)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test.buyer@mole.np",
+  "password": "password123",
+  "full_name": "Test Buyer",
+  "role": "buyer",
+  "industry": "Biomass energy plants",
+  "location": "Patan"
+}
+
+###
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test.generator@mole.np",
+  "password": "password123"
+}
+
+###
+
+### Get Current User
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────────
+# LISTINGS
+# ─────────────────────────────────────────────────
+
+### Get All Listings (public)
+GET {{baseUrl}}/api/listings
+
+###
+
+### Get Listings — filtered by category
+GET {{baseUrl}}/api/listings?category=wood_biomass&page=1&limit=10
+
+###
+
+### Get Listings — filtered by neighborhood
+GET {{baseUrl}}/api/listings?neighborhood=Bhaktapur
+
+###
+
+### Get Single Listing
+GET {{baseUrl}}/api/listings/LISTING_ID_HERE
+
+###
+
+### Create Listing (auth required)
+POST {{baseUrl}}/api/listings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Hardwood Offcuts — काठको धुलो",
+  "category_code": "wood_biomass",
+  "material_type": "Hardwood offcuts and sawdust",
+  "quantity_kg": 300,
+  "condition": "Clean",
+  "price_npr_min": 4,
+  "price_npr_max": 7,
+  "neighborhood": "Bhaktapur / Thimi",
+  "lat": 27.6727,
+  "lng": 85.3990
+}
+
+###
+
+### Update Listing Status (owner only)
+PUT {{baseUrl}}/api/listings/LISTING_ID_HERE
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "sold"
+}
+
+###
+
+### Delete Listing (owner only)
+DELETE {{baseUrl}}/api/listings/LISTING_ID_HERE
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────────
+# MATCHES
+# ─────────────────────────────────────────────────
+
+### Get Matched Listings for Buyer (auth required)
+GET {{baseUrl}}/api/matches
+Authorization: Bearer {{token}}
+
+###
+
+### Express Interest in a Listing
+POST {{baseUrl}}/api/matches
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "listing_id": "LISTING_ID_HERE"
+}
+
+###
+
+### Update Match Status
+PUT {{baseUrl}}/api/matches/MATCH_ID_HERE
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "contacted"
+}
+
+# ─────────────────────────────────────────────────
+# AI CLASSIFY
+# ─────────────────────────────────────────────────
+
+### Get Available Fallback Responses (public)
+GET {{baseUrl}}/api/ai/fallbacks
+
+###
+
+### Classify Waste Image (auth required)
+### Note: Use multipart/form-data with field name "image"
+### In REST Client: use a real image file path
+POST {{baseUrl}}/api/ai/classify
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="image"; filename="waste.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+------FormBoundary--
+
+# ─────────────────────────────────────────────────
+# IMPACT
+# ─────────────────────────────────────────────────
+
+### Get Platform Impact Stats (public)
+GET {{baseUrl}}/api/impact
+
+# ─────────────────────────────────────────────────
+# CATEGORIES
+# ─────────────────────────────────────────────────
+
+### Get All Categories
+GET {{baseUrl}}/api/categories
+
+###
+
+### Get Single Category
+GET {{baseUrl}}/api/categories/wood_biomass
