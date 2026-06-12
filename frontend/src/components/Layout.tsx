@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense, ReactNode } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { DockChat } from './DockChat';
 import {
@@ -58,7 +58,7 @@ const SidebarItem = ({ icon: Icon, label, to, badge }: { icon: any; label: strin
 );
 
 /* ─── Sidebar Section Label ─── */
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+const SectionLabel = ({ children }: { children: ReactNode }) => (
     <p className="px-3.5 text-[11px] font-bold text-surface-400 uppercase tracking-[0.08em] mb-2 mt-6">
         {children}
     </p>
@@ -378,7 +378,16 @@ const Layout = () => {
 
                 {/* Page Content */}
                 <div className="flex-1 overflow-y-auto">
-                    <Outlet />
+                    <Suspense fallback={
+                        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 animate-fade-in">
+                            <div className="w-10 h-10 rounded-full border-[3px] border-surface-200 border-t-brand-600 animate-spin" />
+                            <p className="text-surface-500 dark:text-surface-400 text-sm font-semibold tracking-wide">
+                                Loading section...
+                            </p>
+                        </div>
+                    }>
+                        <Outlet />
+                    </Suspense>
                 </div>
             </main>
             <DockChat position="bottom-right" />

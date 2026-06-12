@@ -22,35 +22,40 @@ const WasteInsights = lazy(() => import('./pages/WasteInsights'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 
-/* Protected Route wrapper */
+/* ─── Branded full-screen page loader ─── */
+const PageLoader = () => (
+    <div style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#F5F6F8',
+        gap: 16,
+        zIndex: 9999,
+    }}>
+        <div style={{
+            width: 44,
+            height: 44,
+            borderRadius: '50%',
+            border: '3px solid #E5E7EB',
+            borderTopColor: '#10B981',
+            animation: 'mole-spin 0.7s linear infinite',
+        }} />
+        <style>{`@keyframes mole-spin { to { transform: rotate(360deg); } }`}</style>
+        <p style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter, sans-serif', fontWeight: 500, margin: 0 }}>
+            Loading…
+        </p>
+    </div>
+);
+
+/* ─── Protected Route wrapper ─── */
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, loading } = useAuth();
     const location = useLocation();
 
-    if (loading) {
-        return (
-            <div style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: '#F8F9FA',
-                flexDirection: 'column',
-                gap: '16px'
-            }}>
-                <div style={{
-                    width: 40,
-                    height: 40,
-                    border: '3px solid #E5E7EB',
-                    borderTopColor: '#10B981',
-                    borderRadius: '50%',
-                    animation: 'spin 0.8s linear infinite',
-                }} />
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                <p style={{ color: '#6B7280', fontSize: 14, fontFamily: 'Inter, sans-serif' }}>Loading session…</p>
-            </div>
-        );
-    }
+    if (loading) return <PageLoader />;
 
     if (!isAuthenticated) {
         return <Navigate to="/login" state={{ from: location }} replace />;
@@ -63,7 +68,7 @@ function App() {
     return (
         <AuthProvider>
             <BrowserRouter basename={import.meta.env.BASE_URL}>
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<PageLoader />}>
                     <Routes>
                         {/* Public Routes */}
                         <Route path="/" element={<LandingPage />} />
