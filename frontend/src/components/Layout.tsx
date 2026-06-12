@@ -8,7 +8,6 @@ import {
     ChevronDown,
     Lightbulb,
     BarChart3,
-    FileText,
     LogOut,
     Menu,
     Bell,
@@ -18,8 +17,6 @@ import {
     MessageSquare,
     Orbit,
     TrendingUp,
-    CheckCircle2,
-    PieChart,
     Loader,
     Moon,
     Sun
@@ -187,16 +184,11 @@ const Layout = () => {
                     <SidebarItem icon={TrendingUp} label="Waste Forecast" to="/app/forecast" />
                     <SidebarItem icon={Recycle} label="Find Materials" to="/app/find" />
                     <SidebarItem icon={MessageSquare} label="Messages" to="/app/messages" />
-                    <SidebarItem icon={CheckCircle2} label="My Deals" to="/app/deals" />
                     <SidebarItem icon={Lightbulb} label="Opportunities" to="/app/opportunities" />
 
                     <SectionLabel>Analytics</SectionLabel>
                     <SidebarItem icon={BarChart3} label="Impact Analytics" to="/app/analytics" />
-                    <SidebarItem icon={PieChart} label="Waste Insights" to="/app/insights" />
                     <SidebarItem icon={Clock} label="Trade History" to="/app/network" />
-
-                    <SectionLabel>System</SectionLabel>
-                    <SidebarItem icon={FileText} label="Reports" to="/app/reports" />
                 </div>
 
                 {/* Dark Mode Toggle — Sidebar Bottom */}

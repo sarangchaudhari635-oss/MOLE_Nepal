@@ -137,16 +137,20 @@ const LandingPage = () => {
                 </div>
             </nav>
 
-            {/* ─── Hero Section with Background Image ─── */}
+            {/* ─── Hero Section with Background Video ─── */}
             <section className="relative pt-32 pb-20 lg:pt-44 lg:pb-32 overflow-hidden">
-                {/* Background Image */}
+                {/* Background Video */}
                 <div className="absolute inset-0 z-0">
-                    <img
-                        src="/hero-bg.png"
-                        alt=""
+                    <video
+                        src="/hero-video.mp4"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
                         className="w-full h-full object-cover"
+                        style={{ pointerEvents: 'none' }}
                     />
-                    {/* Light mode overlay: heavy white wash so dark image text is readable */}
+                    {/* Light mode overlay: heavy white wash so dark video text is readable */}
                     <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/80 to-white/95 dark:hidden" />
                     {/* Dark mode overlay: dark semi-transparent for moody look */}
                     <div className="absolute inset-0 hidden dark:block bg-gradient-to-b from-[#0F1117]/80 via-[#0F1117]/70 to-[#0F1117]/95" />
@@ -191,78 +195,7 @@ const LandingPage = () => {
                         </div>
                     </div>
 
-                    {/* Hero Visual — Abstract Industrial Network */}
-                    <div className="flex-1 w-full max-w-xl lg:max-w-none relative">
-                        <div className="relative aspect-square md:aspect-[4/3] rounded-3xl overflow-hidden flex flex-col justify-center items-center p-8">
-                            {/* Grid BG */}
-                            <svg className="absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <pattern id="hero-grid" width="32" height="32" patternUnits="userSpaceOnUse">
-                                        <path d="M 32 0 L 0 0 0 32" fill="none" stroke="currentColor" strokeWidth="0.5" />
-                                    </pattern>
-                                </defs>
-                                <rect width="100%" height="100%" fill="url(#hero-grid)" />
-                            </svg>
 
-                            {/* Nodes & Flow */}
-                            <div className="relative w-full max-w-md h-[300px] flex items-center justify-center">
-                                {/* Left Node */}
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-surface-800 p-4 rounded-2xl shadow-lg shadow-orange-500/5 dark:shadow-orange-500/10 border border-surface-100 dark:border-surface-700 flex flex-col items-center gap-2 z-10 animate-float" style={{ animationDelay: '0s' }}>
-                                    <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-500/15 flex items-center justify-center">
-                                        <Factory className="text-orange-500 dark:text-orange-400" size={22} />
-                                    </div>
-                                    <span className="text-xs font-bold text-surface-800 dark:text-surface-200">Steel Slag</span>
-                                    <span className="text-[10px] text-surface-500 dark:text-surface-400 font-medium">Auto Mfg.</span>
-                                </div>
-
-                                {/* AI Core */}
-                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                                    <div className="w-[88px] h-[88px] rounded-full bg-gradient-to-br from-brand-50 to-emerald-50 dark:from-brand-500/20 dark:to-emerald-500/20 border-[3px] border-brand-200 dark:border-brand-500/40 flex items-center justify-center shadow-glow">
-                                        <Cpu className="text-brand-600 dark:text-brand-400 w-9 h-9" />
-                                    </div>
-                                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-brand-500 text-white text-[10px] font-bold whitespace-nowrap shadow-md">
-                                        AI Engine
-                                    </div>
-                                </div>
-
-                                {/* Flow lines */}
-                                <div className="absolute left-[18%] right-[18%] top-1/2 h-[2px] bg-gradient-to-r from-orange-200 via-brand-300 to-blue-200 dark:from-orange-500/30 dark:via-brand-500/40 dark:to-blue-500/30 -translate-y-1/2 opacity-40 dark:opacity-60" />
-                                {/* Animated dot */}
-                                <div className="absolute left-[30%] top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-brand-500 rounded-full animate-pulse-dot shadow-[0_0_12px_rgba(16,185,129,0.6)]" />
-
-                                {/* Right Node */}
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-surface-800 p-4 rounded-2xl shadow-lg shadow-blue-500/5 dark:shadow-blue-500/10 border border-surface-100 dark:border-surface-700 flex flex-col items-center gap-2 z-10 animate-float" style={{ animationDelay: '1.5s' }}>
-                                    <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/15 flex items-center justify-center">
-                                        <Factory className="text-blue-500 dark:text-blue-400" size={22} />
-                                    </div>
-                                    <span className="text-xs font-bold text-surface-800 dark:text-surface-200">Aggregate</span>
-                                    <span className="text-[10px] text-surface-500 dark:text-surface-400 font-medium">Construction</span>
-                                </div>
-
-                                {/* Bottom Match Indicator */}
-                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-white dark:bg-surface-800 px-5 py-2.5 border border-brand-200 dark:border-brand-500/30 rounded-full shadow-lg shadow-brand-500/10 flex items-center gap-2 text-sm font-bold text-brand-800 dark:text-brand-300 z-30">
-                                    <CheckCircle2 size={16} className="text-brand-500 dark:text-brand-400" />
-                                    98% Synergy Match
-                                </div>
-
-                                {/* Top-left small node */}
-                                <div className="absolute left-[15%] top-4 bg-white dark:bg-surface-800 p-2.5 rounded-xl shadow-md border border-surface-100 dark:border-surface-700 flex items-center gap-2 z-10 animate-float" style={{ animationDelay: '0.8s' }}>
-                                    <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-500/15 flex items-center justify-center">
-                                        <Leaf className="text-purple-500 dark:text-purple-400" size={16} />
-                                    </div>
-                                    <span className="text-[11px] font-semibold text-surface-800 dark:text-surface-200">Biomass</span>
-                                </div>
-
-                                {/* Top-right small node */}
-                                <div className="absolute right-[15%] top-4 bg-white dark:bg-surface-800 p-2.5 rounded-xl shadow-md border border-surface-100 dark:border-surface-700 flex items-center gap-2 z-10 animate-float" style={{ animationDelay: '2.2s' }}>
-                                    <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-500/15 flex items-center justify-center">
-                                        <Zap className="text-amber-500 dark:text-amber-400" size={16} />
-                                    </div>
-                                    <span className="text-[11px] font-semibold text-surface-800 dark:text-surface-200">Energy</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 

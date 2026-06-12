@@ -15,10 +15,7 @@ const AuthPage = lazy(() => import('./pages/AuthPage'));
 const TradeHistory = lazy(() => import('./pages/TradeHistory'));
 const Messages = lazy(() => import('./pages/Messages'));
 const ImpactAnalytics = lazy(() => import('./pages/ImpactAnalytics'));
-const Reports = lazy(() => import('./pages/Reports'));
 const Settings = lazy(() => import('./pages/Settings'));
-const MyDeals = lazy(() => import('./pages/MyDeals'));
-const WasteInsights = lazy(() => import('./pages/WasteInsights'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 
@@ -87,12 +84,9 @@ function App() {
                             <Route path="processing" element={<AIProcessing />} />
                             <Route path="matches" element={<Matches />} />
                             <Route path="opportunities" element={<Opportunities />} />
-                            <Route path="deals" element={<MyDeals />} />
                             <Route path="network" element={<TradeHistory />} />
                             <Route path="messages" element={<Messages />} />
                             <Route path="analytics" element={<ImpactAnalytics />} />
-                            <Route path="insights" element={<WasteInsights />} />
-                            <Route path="reports" element={<Reports />} />
                             <Route path="settings" element={<Settings />} />
                         </Route>
                     </Routes>

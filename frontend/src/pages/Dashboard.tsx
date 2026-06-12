@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
     CheckCircle2, AlertCircle, Zap, ChevronRight,
     TrendingUp, Leaf, ArrowUpRight, ListPlus, Lightbulb,
-    Plus, Search, ArrowRight, Recycle, Package, Clock, Trash2, Loader
+    Plus, Search, ArrowRight, Recycle, Package, Clock, Trash2, Loader, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -207,6 +207,12 @@ const Dashboard = () => {
                     </p>
                 </div>
                 <div className="flex gap-3">
+                    <Link
+                        to="/app/messages"
+                        className="px-4 py-2.5 text-[13px] font-semibold text-surface-700 bg-white border border-surface-200 hover:border-surface-300 rounded-xl shadow-sm flex items-center gap-2 transition-all hover:-translate-y-0.5"
+                    >
+                        <MessageSquare size={14} className="text-surface-400" /> Messages
+                    </Link>
                     <Link
                         to="/app/find"
                         className="px-4 py-2.5 text-[13px] font-semibold text-surface-700 bg-white border border-surface-200 hover:border-surface-300 rounded-xl shadow-sm flex items-center gap-2 transition-all hover:-translate-y-0.5"
