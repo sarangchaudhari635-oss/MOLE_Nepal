@@ -22,5 +22,6 @@ router.post('/login', authController.login);
  * Headers: Authorization: Bearer <token>
  */
 router.get('/me', require('../middleware/auth').requireAuth, authController.getMe);
+router.post('/demo-token', authController.demoToken);
 
 module.exports = router;

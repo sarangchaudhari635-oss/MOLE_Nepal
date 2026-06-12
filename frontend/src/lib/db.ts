@@ -56,7 +56,7 @@ export interface ImpactLog {
 // Pre-seeded Users
 export const SEEDED_USERS: User[] = [
   {
-    id: "user-ram-generator",
+    id: "00000000-0000-0000-0000-000000000001",
     email: "ram@furniture.np",
     full_name: "Ram Shrestha",
     role: "generator",
@@ -67,7 +67,7 @@ export const SEEDED_USERS: User[] = [
     created_at: new Date("2026-01-10").toISOString()
   },
   {
-    id: "user-sita-buyer",
+    id: "00000000-0000-0000-0000-000000000002",
     email: "sita@pataninsulation.np",
     full_name: "Sita Thapa",
     role: "buyer",
@@ -79,7 +79,7 @@ export const SEEDED_USERS: User[] = [
     created_at: new Date("2026-02-15").toISOString()
   },
   {
-    id: "user-bijay-agent",
+    id: "00000000-0000-0000-0000-000000000003",
     email: "bijay@balajuscrap.np",
     full_name: "Bijay Tamang",
     role: "agent",
@@ -90,7 +90,7 @@ export const SEEDED_USERS: User[] = [
     created_at: new Date("2026-03-05").toISOString()
   },
   {
-    id: "user-admin",
+    id: "00000000-0000-0000-0000-000000000004",
     email: "admin@mole.org.np",
     full_name: "MOLE System Administrator",
     role: "admin",
@@ -105,7 +105,7 @@ export const SEEDED_USERS: User[] = [
 export const SEEDED_LISTINGS: Listing[] = [
   {
     id: "listing-wood-dust",
-    user_id: "user-ram-generator",
+    user_id: "00000000-0000-0000-0000-000000000001",
     seller_name: "Ram Shrestha",
     seller_company: "Bhaktapur Furniture Cluster",
     seller_phone: "+977 9851012345",
@@ -125,7 +125,7 @@ export const SEEDED_LISTINGS: Listing[] = [
   },
   {
     id: "listing-carpet-wool",
-    user_id: "user-ram-generator",
+    user_id: "00000000-0000-0000-0000-000000000001",
     seller_name: "Ram Shrestha",
     seller_company: "Bhaktapur Furniture Cluster",
     seller_phone: "+977 9851012345",
@@ -145,7 +145,7 @@ export const SEEDED_LISTINGS: Listing[] = [
   },
   {
     id: "listing-plastic-hdpe",
-    user_id: "user-ram-generator",
+    user_id: "00000000-0000-0000-0000-000000000001",
     seller_name: "Ram Shrestha",
     seller_company: "Bhaktapur Furniture Cluster",
     seller_phone: "+977 9851012345",
@@ -165,7 +165,7 @@ export const SEEDED_LISTINGS: Listing[] = [
   },
   {
     id: "listing-concrete-rubble",
-    user_id: "user-ram-generator",
+    user_id: "00000000-0000-0000-0000-000000000001",
     seller_name: "Ram Shrestha",
     seller_company: "Bhaktapur Furniture Cluster",
     seller_phone: "+977 9851012345",
@@ -185,7 +185,7 @@ export const SEEDED_LISTINGS: Listing[] = [
   },
   {
     id: "listing-metal-shavings",
-    user_id: "user-ram-generator",
+    user_id: "00000000-0000-0000-0000-000000000001",
     seller_name: "Ram Shrestha",
     seller_company: "Bhaktapur Furniture Cluster",
     seller_phone: "+977 9851012345",
@@ -205,7 +205,7 @@ export const SEEDED_LISTINGS: Listing[] = [
   },
   {
     id: "listing-brick-dust",
-    user_id: "user-ram-generator",
+    user_id: "00000000-0000-0000-0000-000000000001",
     seller_name: "Ram Shrestha",
     seller_company: "Bhaktapur Furniture Cluster",
     seller_phone: "+977 9851012345",
@@ -225,7 +225,7 @@ export const SEEDED_LISTINGS: Listing[] = [
   },
   {
     id: "listing-cardboard-paper",
-    user_id: "user-ram-generator",
+    user_id: "00000000-0000-0000-0000-000000000001",
     seller_name: "Ram Shrestha",
     seller_company: "Bhaktapur Furniture Cluster",
     seller_phone: "+977 9851012345",
@@ -245,7 +245,7 @@ export const SEEDED_LISTINGS: Listing[] = [
   },
   {
     id: "listing-glass-cullet",
-    user_id: "user-ram-generator",
+    user_id: "00000000-0000-0000-0000-000000000001",
     seller_name: "Ram Shrestha",
     seller_company: "Bhaktapur Furniture Cluster",
     seller_phone: "+977 9851012345",
@@ -270,28 +270,28 @@ export const SEEDED_MATCHES: Match[] = [
   {
     id: "match-carpet",
     listing_id: "listing-carpet-wool",
-    buyer_id: "user-sita-buyer",
+    buyer_id: "00000000-0000-0000-0000-000000000002",
     status: "closed",
     created_at: new Date("2026-06-09T12:00:00Z").toISOString()
   },
   {
     id: "match-cardboard",
     listing_id: "listing-cardboard-paper",
-    buyer_id: "user-sita-buyer",
+    buyer_id: "00000000-0000-0000-0000-000000000002",
     status: "closed",
     created_at: new Date("2026-06-06T10:00:00Z").toISOString()
   },
   {
     id: "match-glass",
     listing_id: "listing-glass-cullet",
-    buyer_id: "user-sita-buyer",
+    buyer_id: "00000000-0000-0000-0000-000000000002",
     status: "closed",
     created_at: new Date("2026-06-07T11:00:00Z").toISOString()
   },
   {
     id: "match-wood-pending",
     listing_id: "listing-wood-dust",
-    buyer_id: "user-sita-buyer",
+    buyer_id: "00000000-0000-0000-0000-000000000002",
     status: "pending",
     created_at: new Date("2026-06-11T10:00:00Z").toISOString()
   }

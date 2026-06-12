@@ -161,4 +161,13 @@ async function getMe(req, res) {
   res.json({ user: userRow });
 }
 
-module.exports = { register, login, getMe };
+async function demoToken(req, res) {
+  const { userId, role } = req.body;
+  if (!userId || !role) {
+    return res.status(400).json({ error: 'userId and role are required.' });
+  }
+  const token = generateToken(userId, role);
+  res.json({ token });
+}
+
+module.exports = { register, login, getMe, demoToken };

@@ -195,4 +195,23 @@ async function updateMatchStatus(req, res) {
   res.json({ message: 'Match status updated.', match: updated });
 }
 
-module.exports = { getMatches, createMatch, updateMatchStatus };
+async function getProposals(req, res) {
+  const { data, error } = await supabase
+    .from('matches')
+    .select(`
+      id,
+      listing_id,
+      buyer_id,
+      status,
+      created_at
+    `);
+
+  if (error) {
+    console.error('[getProposals] Supabase error:', error.message);
+    return res.status(500).json({ error: 'Failed to fetch match proposals.' });
+  }
+
+  res.json({ proposals: data });
+}
+
+module.exports = { getMatches, createMatch, updateMatchStatus, getProposals };

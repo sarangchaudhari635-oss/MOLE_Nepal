@@ -26,30 +26,30 @@ const supabase = createClient(
 
 const DEMO_SELLER = {
   id: '00000000-0000-0000-0000-000000000001',
-  email: 'ram.shrestha@demo.mole.np',
+  email: 'ram@furniture.np',
   full_name: 'Ram Shrestha',
   role: 'generator',
-  phone: '+977-9841000001',
-  location: 'Bhaktapur',
+  phone: '+977 9851012345',
+  location: 'Bhaktapur / Thimi',
   industry: null,
 };
 
 const DEMO_BUYER = {
   id: '00000000-0000-0000-0000-000000000002',
-  email: 'sita.thapa@demo.mole.np',
+  email: 'sita@pataninsulation.np',
   full_name: 'Sita Thapa',
   role: 'buyer',
-  phone: '+977-9841000002',
-  location: 'Patan Industrial Estate, Lalitpur',
-  industry: 'Biomass energy plants',
+  phone: '+977 9841987654',
+  location: 'Patan Industrial Estate',
+  industry: 'Biomass energy plants, paper mills, particle board factories, insulation manufacturers, recycled yarn producers',
 };
 
 const DEMO_AGENT = {
   id: '00000000-0000-0000-0000-000000000003',
-  email: 'bijay.tamang@demo.mole.np',
+  email: 'bijay@balajuscrap.np',
   full_name: 'Bijay Tamang',
   role: 'agent',
-  phone: '+977-9841000003',
+  phone: '+977 9803123456',
   location: 'Balaju, Kathmandu',
   industry: null,
 };
@@ -195,7 +195,8 @@ async function seedUsers() {
 async function seedListings(sellerId) {
   console.log('\n📋 Seeding demo listings...');
 
-  const listingsWithOwner = DEMO_LISTINGS.map((listing) => ({
+  const listingsWithOwner = DEMO_LISTINGS.map((listing, index) => ({
+    id: `00000000-0000-0000-0000-00000000010${index + 1}`,
     ...listing,
     user_id: sellerId,
     status: 'active',
@@ -203,7 +204,7 @@ async function seedListings(sellerId) {
 
   const { data, error } = await supabase
     .from('listings')
-    .upsert(listingsWithOwner, { onConflict: 'title' })
+    .upsert(listingsWithOwner, { onConflict: 'id' })
     .select('id, title');
 
   if (error) {
@@ -253,8 +254,8 @@ async function main() {
   }
 
   console.log('\n✅ Seed complete!');
-  console.log('   Demo login (generator): ram.shrestha@demo.mole.np');
-  console.log('   Demo login (buyer):     sita.thapa@demo.mole.np');
+  console.log('   Demo login (generator): ram@furniture.np');
+  console.log('   Demo login (buyer):     sita@pataninsulation.np');
   console.log('   Note: You must create Supabase Auth accounts for demo users separately,');
   console.log('         or use the /api/auth/register endpoint with the same emails.\n');
 }

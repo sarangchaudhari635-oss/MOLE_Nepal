@@ -24,5 +24,6 @@ router.post('/', requireAuth, matchesController.createMatch);
  * Body: { status }
  */
 router.put('/:id', requireAuth, matchesController.updateMatchStatus);
+router.get('/proposals', requireAuth, matchesController.getProposals);
 
 module.exports = router;
