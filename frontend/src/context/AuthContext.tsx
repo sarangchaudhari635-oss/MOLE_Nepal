@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { firebaseAuth, googleProvider, isFirebaseConfigured } from '../lib/firebase';
+import { signInWithPopup } from 'firebase/auth';
 import type { Session, User } from '@supabase/supabase-js';
 
 /* ─── Types ─── */
@@ -19,6 +21,8 @@ interface AuthContextType {
     signup: (email: string, password: string, company: string, industry: string, location: string) => Promise<{ error: string | null }>;
     logout: () => Promise<void>;
     resetPassword: (email: string) => Promise<{ error: string | null }>;
+    updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
+    signInWithGoogle: () => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -139,13 +143,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
     };
 
-    /* ─── Reset Password ─── */
+    /* ─── Reset Password (sends magic link email) ─── */
     const resetPassword = async (email: string): Promise<{ error: string | null }> => {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) return { error: error.message };
         return { error: null };
+    };
+
+    /* ─── Update Password (called after magic link lands) ─── */
+    const updatePassword = async (newPassword: string): Promise<{ error: string | null }> => {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) return { error: error.message };
+        return { error: null };
+    };
+
+    /* ─── Google Sign-In via Firebase → Supabase ─── */
+    const signInWithGoogle = async (): Promise<{ error: string | null }> => {
+        if (!isFirebaseConfigured || !firebaseAuth) {
+            return { error: 'Google Sign-In is not configured. Please add Firebase credentials to your .env file.' };
+        }
+        try {
+            const result = await signInWithPopup(firebaseAuth, googleProvider);
+            const idToken = await result.user.getIdToken();
+
+            // Exchange Firebase ID token for a Supabase session
+            const { error } = await supabase.auth.signInWithIdToken({
+                provider: 'google',
+                token: idToken,
+            });
+
+            if (error) return { error: error.message };
+            return { error: null };
+        } catch (err: any) {
+            if (err?.code === 'auth/popup-closed-by-user') return { error: null }; // user cancelled
+            return { error: err?.message || 'Google Sign-In failed.' };
+        }
     };
 
     return (
@@ -160,6 +194,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 signup,
                 logout,
                 resetPassword,
+                updatePassword,
+                signInWithGoogle,
             }}
         >
             {children}

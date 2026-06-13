@@ -18,6 +18,7 @@ const ImpactAnalytics = lazy(() => import('./pages/ImpactAnalytics'));
 const Settings = lazy(() => import('./pages/Settings'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 
 /* ─── Branded full-screen page loader ─── */
 const PageLoader = () => (
@@ -74,6 +75,7 @@ function App() {
                         <Route path="/forgot-password" element={<AuthPage />} />
                         <Route path="/terms" element={<TermsPage />} />
                         <Route path="/privacy" element={<PrivacyPage />} />
+                        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                         {/* Protected App Routes */}
                         <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
