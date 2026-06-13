@@ -160,10 +160,7 @@ const LandingPage = () => {
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col lg:flex-row items-center gap-16">
                     <div className="flex-1 text-center lg:text-left">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-50/90 dark:bg-brand-500/20 border border-brand-100/60 dark:border-brand-500/30 text-brand-700 dark:text-brand-300 text-[13px] font-semibold mb-8 backdrop-blur-sm">
-                            <Sparkles size={14} className="text-brand-500 dark:text-brand-400" />
-                            <span>AI-Powered Circular Economy Platform</span>
-                        </div>
+
 
                         <h1 className="text-5xl lg:text-[72px] font-extrabold tracking-[-0.03em] text-surface-900 dark:text-white leading-[1.05] mb-6">
                             Transform Industrial{' '}
@@ -203,9 +200,7 @@ const LandingPage = () => {
             <section id="problem" className="py-24 bg-white dark:bg-[#141620] border-y border-surface-100 dark:border-white/[0.06] transition-colors duration-300">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16">
-                        <div className="inline-block px-4 py-1.5 rounded-full bg-surface-50 dark:bg-white/[0.06] text-surface-600 dark:text-surface-400 text-[13px] font-semibold mb-4 border border-surface-200 dark:border-white/10">
-                            Why MOLE
-                        </div>
+
                         <h2 className="text-3xl md:text-[42px] font-extrabold tracking-tight text-surface-900 dark:text-white mb-4 leading-tight">The Linear Economy is Broken</h2>
                         <p className="text-lg text-surface-800/60 dark:text-surface-400 max-w-2xl mx-auto">Billions of dollars are lost annually in disposal costs while perfectly recyclable secondary materials go to waste.</p>
                     </div>
