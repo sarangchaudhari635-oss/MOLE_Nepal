@@ -1,0 +1,3 @@
+# Root configuration to tell Netlify where the frontend is located
+[build]
+  base = "frontend"
