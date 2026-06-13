@@ -208,7 +208,7 @@ const FindMaterials = () => {
     const selectClasses = `${inputClasses} appearance-none cursor-pointer`;
 
     return (
-        <div className="p-6 lg:p-8 max-w-[1400px] mx-auto animate-fade-in">
+        <div className="p-6 lg:p-8 animate-fade-in">
 
             {/* ─── Page Header ─── */}
             <div className="mb-8">
@@ -224,10 +224,7 @@ const FindMaterials = () => {
             </div>
 
             <form onSubmit={handleSearch}>
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-                    {/* ═══════ LEFT: Sourcing Request Form (2 cols) ═══════ */}
-                    <div className="xl:col-span-2 space-y-6">
+                <div className="space-y-6">
 
                         {/* Card 1: Material Requirements */}
                         <div className="bg-white rounded-2xl border border-surface-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 lg:p-8 space-y-6">
@@ -252,54 +249,54 @@ const FindMaterials = () => {
                                 </div>
                             </FormField>
 
-                            {/* Quantity + Frequency */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormField label="Quantity Required" required>
-                                    <div className="flex gap-3">
-                                        <input
-                                            type="number"
-                                            value={form.quantity}
-                                            onChange={e => update('quantity', e.target.value)}
-                                            placeholder="0.00"
-                                            className="flex-1 bg-surface-50/80 border border-surface-200 rounded-[18px] px-5 py-4 text-[15px] text-surface-900 placeholder-surface-300 font-semibold focus:outline-none focus:bg-white focus:border-brand-400 focus:ring-4 focus:ring-brand-500/8 transition-all"
-                                        />
-                                        <div className="relative">
-                                            <select
-                                                value={form.unit}
-                                                onChange={e => update('unit', e.target.value)}
-                                                className="w-[110px] h-full bg-surface-50/80 border border-surface-200 rounded-[18px] px-4 text-[15px] text-surface-900 font-bold focus:outline-none focus:bg-white focus:border-brand-400 transition-all appearance-none cursor-pointer text-center"
-                                            >
-                                                <option>Tons</option>
-                                                <option>Kg</option>
-                                                <option>Liters</option>
-                                                <option>m³</option>
-                                            </select>
-                                        </div>
+                            {/* Quantity */}
+                            <FormField label="Quantity Required" required>
+                                <div className="flex gap-3">
+                                    <input
+                                        type="number"
+                                        value={form.quantity}
+                                        onChange={e => update('quantity', e.target.value)}
+                                        placeholder="0.00"
+                                        className="flex-1 bg-surface-50/80 border border-surface-200 rounded-[18px] px-5 py-4 text-[15px] text-surface-900 placeholder-surface-300 font-semibold focus:outline-none focus:bg-white focus:border-brand-400 focus:ring-4 focus:ring-brand-500/8 transition-all"
+                                    />
+                                    <div className="relative">
+                                        <select
+                                            value={form.unit}
+                                            onChange={e => update('unit', e.target.value)}
+                                            className="w-[110px] h-full bg-surface-50/80 border border-surface-200 rounded-[18px] px-4 text-[15px] text-surface-900 font-bold focus:outline-none focus:bg-white focus:border-brand-400 transition-all appearance-none cursor-pointer text-center"
+                                        >
+                                            <option>Tons</option>
+                                            <option>Kg</option>
+                                            <option>Liters</option>
+                                            <option>m³</option>
+                                        </select>
                                     </div>
-                                </FormField>
+                                </div>
+                            </FormField>
 
-                                <FormField label="Frequency">
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {(['one-time', 'recurring', 'continuous'] as const).map(freq => (
-                                            <button
-                                                key={freq}
-                                                type="button"
-                                                onClick={() => update('frequency', freq)}
-                                                className={`py-3 rounded-xl text-[12px] font-bold transition-all border-2 flex items-center justify-center gap-1.5 ${form.frequency === freq
+                            {/* Frequency */}
+                            <FormField label="Frequency">
+                                <div className="flex gap-3">
+                                    {(['one-time', 'recurring', 'continuous'] as const).map(freq => (
+                                        <button
+                                            key={freq}
+                                            type="button"
+                                            onClick={() => update('frequency', freq)}
+                                            className={`flex-1 py-3 px-4 rounded-xl text-[13px] font-bold transition-all border-2 flex items-center justify-center gap-2 min-w-0 ${
+                                                form.frequency === freq
                                                     ? 'bg-brand-50 border-brand-400 text-brand-700 shadow-[0_2px_8px_rgba(16,185,129,0.1)]'
                                                     : 'bg-surface-50 border-surface-200 text-surface-500 hover:border-surface-300 hover:bg-surface-100'
-                                                    }`}
-                                            >
-                                                {freq === 'one-time' ? <Clock size={13} /> : freq === 'recurring' ? <Recycle size={13} /> : <Leaf size={13} />}
-                                                {freq === 'one-time' ? 'One-Time' : freq === 'recurring' ? 'Recurring' : 'Continuous'}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </FormField>
-                            </div>
+                                            }`}
+                                        >
+                                            {freq === 'one-time' ? <Clock size={14} /> : freq === 'recurring' ? <Recycle size={14} /> : <Leaf size={14} />}
+                                            <span className="truncate">{freq === 'one-time' ? 'One-Time' : freq === 'recurring' ? 'Recurring' : 'Continuous'}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </FormField>
 
                             {/* Quality Constraints */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                 <FormField label="Quality Grade">
                                     <div className="relative">
                                         <select
@@ -338,7 +335,7 @@ const FindMaterials = () => {
 
                             {/* Handling Capabilities */}
                             <FormField label="Handling Capabilities" hint="Select all capabilities available at your facility">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5">
                                     {handlingOptions.map(h => (
                                         <button
                                             key={h.id}
@@ -360,8 +357,8 @@ const FindMaterials = () => {
                             </FormField>
 
                             {/* Location + Max Distance */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="md:col-span-2">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                <div className="md:col-span-3">
                                     <FormField label="Delivery Location">
                                         <div className="relative">
                                             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-500" size={16} />
@@ -410,81 +407,71 @@ const FindMaterials = () => {
                             </div>
                         )}
 
-                        {/* Submit Button */}
-                        <div className="flex justify-end pt-2">
-                            <button
-                                type="submit"
-                                disabled={isSearching}
-                                className="group relative overflow-hidden bg-brand-500 hover:bg-brand-600 text-white font-bold text-[15px] py-4 px-10 rounded-2xl shadow-lg shadow-brand-500/20 hover:shadow-xl hover:shadow-brand-500/25 transition-all flex items-center gap-3 disabled:opacity-80 disabled:cursor-not-allowed hover:-translate-y-0.5"
-                            >
-                                {isSearching ? (
-                                    <>
-                                        <Loader className="animate-spin" size={18} />
-                                        Saving & Scanning Waste Streams...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Search size={18} />
-                                        Find Matching Waste Streams
-                                        <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
-                                    </>
-                                )}
-                                <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-                            </button>
-                        </div>
+                        {/* Submit Button — full width */}
+                        <button
+                            type="submit"
+                            disabled={isSearching}
+                            className="group relative overflow-hidden w-full bg-brand-500 hover:bg-brand-600 text-white font-bold text-[15px] py-4 px-10 rounded-2xl shadow-lg shadow-brand-500/20 hover:shadow-xl hover:shadow-brand-500/25 transition-all flex items-center justify-center gap-3 disabled:opacity-80 disabled:cursor-not-allowed hover:-translate-y-0.5"
+                        >
+                            {isSearching ? (
+                                <>
+                                    <Loader className="animate-spin" size={18} />
+                                    Saving & Scanning Waste Streams...
+                                </>
+                            ) : (
+                                <>
+                                    <Search size={18} />
+                                    Find Matching Waste Streams
+                                    <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
+                                </>
+                            )}
+                            <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+                        </button>
+
                     </div>
 
-                    {/* ═══════ RIGHT: Summary Sidebar ═══════ */}
-                    <div className="space-y-6">
-
-                        {/* SENT OFFERS SECTION */}
-                        {sentOffers.length > 0 && (
-                            <div className="bg-white rounded-2xl border border-surface-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
-                                <div className="bg-surface-900 px-6 py-4 flex items-center justify-between border-b border-surface-100">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center shadow-sm">
-                                            <Send size={16} className="text-white" />
+                    {/* ═══════ Sent Offers — full-width panel ═══════ */}
+                    {sentOffers.length > 0 && (
+                        <div className="bg-white rounded-2xl border border-surface-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
+                            <div className="bg-surface-900 px-6 py-4 flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center shadow-sm">
+                                        <Send size={16} className="text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-[14px] font-bold text-white">My Sent Offers</h3>
+                                        <p className="text-[11px] text-surface-400 font-medium">Your active sourcing requests</p>
+                                    </div>
+                                </div>
+                                <span className="bg-white/10 text-white text-[11px] font-bold px-3 py-1 rounded-full border border-white/5">
+                                    {sentOffers.length}
+                                </span>
+                            </div>
+                            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                                {sentOffers.map(offer => (
+                                    <div key={offer.id} className="p-4 bg-surface-50 border border-surface-100 rounded-xl hover:border-brand-200 hover:bg-white transition-all">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="text-[13px] font-bold text-surface-900 leading-snug">{offer.material_from}</h4>
+                                            <span className={`ml-2 shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight 
+                                                ${offer.status === 'accepted' ? 'bg-emerald-100 text-emerald-700' :
+                                                    offer.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                        'bg-amber-100 text-amber-700'}`}>
+                                                {offer.status === 'active' ? 'Pending' : offer.status}
+                                            </span>
                                         </div>
-                                        <div>
-                                            <h3 className="text-[14px] font-bold text-white">My Sent Offers</h3>
-                                            <p className="text-[11px] text-surface-400 font-medium">Your sourcing requests</p>
+                                        <p className="text-[11px] text-surface-500 font-medium mb-3">
+                                            To: {offer.companies?.company_name || 'Verified Supplier'}
+                                        </p>
+                                        <div className="flex gap-3 text-[11px] font-medium text-surface-500 border-t border-surface-100 pt-2">
+                                            <span><strong className="text-surface-900">Vol:</strong> {offer.volume}</span>
+                                            <span><strong className="text-surface-900">Freq:</strong> {offer.frequency}</span>
                                         </div>
                                     </div>
-                                    <span className="bg-white/10 text-white text-[11px] font-bold px-3 py-1 rounded-full border border-white/5">
-                                        {sentOffers.length}
-                                    </span>
-                                </div>
-                                <div className="p-4 max-h-[300px] overflow-y-auto custom-scrollbar flex flex-col gap-3">
-                                    {sentOffers.map(offer => (
-                                        <div key={offer.id} className="p-3 bg-surface-50 border border-surface-100 rounded-xl relative group hover:border-brand-200 hover:bg-white transition-all">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div>
-                                                    <h4 className="text-[13px] font-bold text-surface-900">Offer for {offer.material_from}</h4>
-                                                    <p className="text-[11px] text-surface-500 font-medium mt-0.5">
-                                                        To: {offer.companies?.company_name || 'Verified Supplier'}
-                                                    </p>
-                                                </div>
-                                                <div className="text-right shrink-0 ml-2">
-                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight 
-                                                        ${offer.status === 'accepted' ? 'bg-emerald-100 text-emerald-700' :
-                                                            offer.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                                'bg-amber-100 text-amber-700'}`}>
-                                                        {offer.status === 'active' ? 'Pending' : offer.status}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-3 text-[11px] font-medium text-surface-500 border-t border-surface-200/50 pt-2 mt-2">
-                                                <span><strong className="text-surface-900">Vol:</strong> {offer.volume}</span>
-                                                <span><strong className="text-surface-900">Freq:</strong> {offer.frequency}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                ))}
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                    </div>
-                </div>
             </form>
 
 

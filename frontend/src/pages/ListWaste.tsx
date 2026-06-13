@@ -324,13 +324,13 @@ const ListWaste = () => {
                             {/* Frequency + Material Condition */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <FormField label="Frequency">
-                                    <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex gap-3">
                                         {(['one-time', 'recurring'] as const).map(freq => (
                                             <button
                                                 key={freq}
                                                 type="button"
                                                 onClick={() => update('frequency', freq)}
-                                                className={`py-3 rounded-xl text-[13px] font-bold transition-all border-2 flex items-center justify-center gap-2 ${form.frequency === freq
+                                                className={`flex-1 py-3 px-4 rounded-xl text-[13px] font-bold transition-all border-2 flex items-center justify-center gap-2 ${form.frequency === freq
                                                     ? 'bg-brand-50 border-brand-400 text-brand-700 shadow-[0_2px_8px_rgba(16,185,129,0.1)]'
                                                     : 'bg-surface-50 border-surface-200 text-surface-500 hover:border-surface-300 hover:bg-surface-100'
                                                     }`}

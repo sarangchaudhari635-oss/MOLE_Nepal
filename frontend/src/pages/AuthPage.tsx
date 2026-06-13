@@ -5,7 +5,7 @@ import {
     ArrowLeft, ArrowRight, Cpu, Lock, Mail, Leaf, CheckCircle2,
     Globe, Building2, MapPin, ChevronDown, Eye, EyeOff, Recycle,
     Zap, Sparkles, Trash2, PackageCheck, Settings2,
-    AlertCircle, ShieldCheck, RefreshCcw, Orbit
+    AlertCircle, ShieldCheck, RefreshCcw, Orbit, Loader
 } from 'lucide-react';
 
 /* ─────────────────────── Types ─────────────────────── */
@@ -198,6 +198,36 @@ const AuthPage = () => {
     const [wasteTypes, setWasteTypes] = useState<string[]>([]);
     const [materialNeeds, setMaterialNeeds] = useState<string[]>([]);
     const [capabilities, setCapabilities] = useState<string[]>([]);
+
+    /* Location detect */
+    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+    const handleDetectLocation = () => {
+        if (!navigator.geolocation) return;
+        setIsDetectingLocation(true);
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                try {
+                    const { latitude, longitude } = pos.coords;
+                    const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+                    );
+                    const data = await res.json();
+                    const addr = data.address;
+                    const city = addr.city || addr.town || addr.village || addr.county || '';
+                    const state = addr.state || '';
+                    const country = addr.country_code?.toUpperCase() || '';
+                    setLocationVal([city, state, country].filter(Boolean).join(', '));
+                } catch {
+                    setLocationVal('');
+                } finally {
+                    setIsDetectingLocation(false);
+                }
+            },
+            () => setIsDetectingLocation(false),
+            { timeout: 8000 }
+        );
+    };
 
     /* Captcha State */
     const [captcha, setCaptcha] = useState({ question: '', answer: '' });
@@ -705,8 +735,19 @@ const AuthPage = () => {
                                                 placeholder="Mumbai, IN"
                                                 value={locationVal}
                                                 onChange={(e) => setLocationVal(e.target.value)}
-                                                className={inputWithIconClass}
+                                                className={`${inputWithIconClass} pr-28`}
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={handleDetectLocation}
+                                                disabled={isDetectingLocation}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-bold text-brand-600 bg-brand-50 border border-brand-100 px-2.5 py-1.5 rounded-lg hover:bg-brand-100 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                                            >
+                                                {isDetectingLocation
+                                                    ? <><Loader size={11} className="animate-spin" /> Detecting...</>
+                                                    : <><MapPin size={11} /> Auto-detect</>
+                                                }
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
