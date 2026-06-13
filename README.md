@@ -244,7 +244,7 @@ MOLE/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/YAD09/MOLE.git
+git clone [https://github.com/YAD09/MOLE.git](https://github.com/sarangchaudhari635-oss/MOLE_Nepal
 cd MOLE
 ```
 
