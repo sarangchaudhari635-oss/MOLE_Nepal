@@ -56,6 +56,7 @@ const useCounter = (end: number, duration = 2000) => {
 const LandingPage = () => {
     const { isAuthenticated } = useAuth();
     const [isDark, setIsDark] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -65,6 +66,19 @@ const LandingPage = () => {
             setIsDark(false);
             document.documentElement.classList.remove('dark');
         }
+    }, []);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 10) {
+                setIsScrolled(true);
+            } else {
+                setIsScrolled(false);
+            }
+        };
+        window.addEventListener('scroll', handleScroll);
+        handleScroll();
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     const toggleTheme = () => {
@@ -94,7 +108,11 @@ const LandingPage = () => {
         <div className="min-h-screen bg-[#FCFCFC] dark:bg-[#0F1117] text-[#1C1C1E] dark:text-white font-sans selection:bg-brand-100 selection:text-brand-900 scroll-smooth transition-colors duration-300">
 
             {/* ─── Navigation ─── */}
-            <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 dark:bg-[#0F1117]/80 backdrop-blur-xl border-b border-surface-200/40 dark:border-white/[0.06] transition-colors duration-300">
+            <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+                isScrolled
+                    ? 'bg-white/80 dark:bg-[#0F1117]/80 backdrop-blur-xl border-b border-surface-200/40 dark:border-white/[0.06] py-0'
+                    : 'bg-transparent border-b border-transparent py-2'
+            }`}>
                 <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
@@ -150,7 +168,7 @@ const LandingPage = () => {
                         style={{ pointerEvents: 'none' }}
                     />
                     {/* Light mode overlay: heavy white wash so dark video text is readable */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/80 to-white/95 dark:hidden" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/45 via-white/30 to-white/55 dark:hidden" />
                     {/* Dark mode overlay: dark semi-transparent for moody look */}
                     <div className="absolute inset-0 hidden dark:block bg-gradient-to-b from-[#0F1117]/80 via-[#0F1117]/70 to-[#0F1117]/95" />
                     {/* Green accent glow in dark mode */}
