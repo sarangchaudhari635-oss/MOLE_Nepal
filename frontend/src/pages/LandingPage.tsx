@@ -6,7 +6,6 @@ import {
     Cpu,
     Globe,
     ListPlus,
-    Factory,
     RefreshCcw,
     Zap,
     CheckCircle2,
